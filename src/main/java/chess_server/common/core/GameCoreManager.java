@@ -24,11 +24,11 @@ public class GameCoreManager {
 		return instance;
 	}
 	
-	public void startGame(String id_1, String id_2) {
-		GameThread gt = new GameThread(id_1, id_2);
+	public void startGame(Player player_1, Player player_2) {
+		GameThread gt = new GameThread(player_1, player_2);
 		gt.startGame();
 		gameThreadPool.put(gt.getThreadId(), gt);
-		log.debug("Match Success(" + gt.getThreadId() + "): " + id_1 + " VS "+ id_2);
+		log.debug("Match Success(" + gt.getThreadId() + "): " + player_1.getNickName() + " VS "+ player_2.getNickName());
 	}
 	
 	public GameThread getGame(long threadId) {

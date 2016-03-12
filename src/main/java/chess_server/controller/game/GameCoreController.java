@@ -11,6 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import chess_server.common.common.CommandMap;
 import chess_server.common.core.GameCoreManager;
 import chess_server.common.core.GameThread;
+import chess_server.common.core.Player;
 
 @Controller
 public class GameCoreController {
@@ -34,9 +35,9 @@ public class GameCoreController {
 	        
 	        GameThread gt = gcm.getGame(Long.parseLong(sessionId));
 	        
-	        String[] users = gt.getUsers();
+	        Player[] users = gt.getUsers();
 	        
-	        mv.addObject("users", String.format("%s VS %s", users[0], users[1]));
+	        mv.addObject("users", String.format("%s(%s) VS %s(%s)", users[0].getNickName(), users[0].getId(), users[1].getNickName(), users[1].getId()));
 		}
 		
 		return mv;
@@ -53,7 +54,7 @@ public class GameCoreController {
 			String type = (String) arg.get("type");
 			String value = (String) arg.get("value");
 			
-			if (!type.equals("COMMAND") || !value.equals("value")) {
+			if (!type.equals("COMMAND") || !value.equals("select")) {
 				return mv;
 			}
 			
@@ -62,8 +63,37 @@ public class GameCoreController {
 			String tile = (String) arg.get("tile");
 			
 			GameThread gt = gcm.getGame(sessionId);
-			String json = gt.availableTiles(userId, tile);
+			String json = gt.availableTiles(tile, gt.getPlayerById(userId));
 			
+			mv.addObject("json", json);
+		}
+		
+		return mv;
+	}
+	
+	@RequestMapping(value="/game/move.cao", method=RequestMethod.GET)
+	public ModelAndView move(CommandMap commandMap) throws Exception {
+		ModelAndView mv = new ModelAndView("game/move");
+		
+		GameCoreManager gcm = GameCoreManager.getInstance();
+		
+		if (commandMap.isEmpty() == false) {
+			Map arg = commandMap.getMap();
+			String type = (String) arg.get("type");
+			String value = (String) arg.get("value");
+			
+			if (!type.equals("COMMAND") || !value.equals("move")) {
+				return mv;
+			}
+			
+			long sessionId = Long.parseLong((String) arg.get("sessionId"));
+			String userId = (String) arg.get("userId");
+			String srcTile = (String) arg.get("srcTile");
+			String destTile = (String) arg.get("destTile");
+			
+			GameThread gt = gcm.getGame(sessionId);
+			
+			String json = gt.userMoveTile(srcTile, destTile);
 			mv.addObject("json", json);
 		}
 		

@@ -7,13 +7,13 @@ import org.apache.log4j.Logger;
 public class MatchMaker implements Runnable {
 	Logger log = Logger.getLogger(this.getClass());
 	
-	private ArrayList<String> queue;
+	private ArrayList<Player> queue;
 	private static long threadId;
 	
 	private static MatchMaker instance;
 	
 	private MatchMaker() {
-		queue = new ArrayList<String>();
+		queue = new ArrayList<Player>();
 	}
 	
 	static {
@@ -59,27 +59,23 @@ public class MatchMaker implements Runnable {
 		return queue.size() >= 2;
 	}
 	
-	public boolean enqueue(String id) {
-		log.debug("User enqueued : " + id);
+	public boolean enqueue(Player player) {
+		log.debug(String.format("User enqueued : %s(%s)", player.getNickName(), player.getId()));
 		
-//		if (getMatchMakingThread().getState() == Thread.State.BLOCKED) {
-//			getMatchMakingThread().notify();
-//		}
-		
-		return queue.add(id);
+		return queue.add(player);
 	}
 	
 	// TODO: 디버깅용으로 queue에 있는 id 중 앞의 두 개를 없에고 Log를 남김. 후에는 GameCoreThread를 생성하여 게임을 진행 할 수 있도록.
 	private void matchSuccess() {
-		String user1 = queue.get(0);
-		String user2 = queue.get(1);
+		Player user1 = queue.get(0);
+		Player user2 = queue.get(1);
 		queue.remove(0);
 		queue.remove(0);
 		
 		GameCoreManager gcm = GameCoreManager.getInstance();
 		gcm.startGame(user1, user2);
 		
-		log.debug(String.format("Matched : %s VS %s", user1, user2));
+		log.debug(String.format("Matched : %s VS %s", user1.getNickName(), user2.getNickName()));
 	}
 	
 	public void printQueue() {

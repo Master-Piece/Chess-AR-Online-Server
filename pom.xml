@@ -58,7 +58,14 @@
                  </exclusion>
             </exclusions>
         </dependency>
-         
+        
+        <!-- GCM Server --> 
+        <dependency>
+			<groupId>com.ganyo</groupId>
+			<artifactId>gcm-server</artifactId>
+			<version>1.0.2</version>
+		</dependency> 
+        
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>

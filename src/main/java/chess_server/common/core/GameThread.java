@@ -8,14 +8,15 @@ public class GameThread implements Runnable {
 	enum Turn {white, black};
 	
 	Thread thread;
-	String whitePlayer;
-	String blackPlayer;
+	Player whitePlayer;
+	Player blackPlayer;
 	Algorithm chessBoard;
 	Turn turn;
 	boolean gameFlag = true; // 게임 종료 또는 항복시 false
-	boolean waitFlag = true; // thread가 블럭이 될지 논블럭이 될지 결정하는 플래그
+	boolean moveFlag = true; // move시 false
+	boolean selectFlag = true; // select시 false
 	
-	public GameThread(String whitePlayer, String blackPlayer) {
+	public GameThread(Player whitePlayer, Player blackPlayer) {
 		this.whitePlayer = whitePlayer;
 		this.blackPlayer = blackPlayer;
 		chessBoard = new Algorithm();
@@ -23,15 +24,20 @@ public class GameThread implements Runnable {
 	
 	@Override
 	public void run() {
+		GCMSender sender = GCMSender.getInstance();
 		while (gameFlag) {
 			// TODO: gcm으로 턴을 알려줌
-			waitThread();
+			sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 			
-			waitNextWithFlag(waitFlag);
-			log.debug("GameThread working");
-			// TODO: Command가 오면 thread를 깨움
-			// TODO: Processing
-			waitThread();
+			waitNextWithFlag(selectFlag);
+			// User selected tile.
+			log.debug("USER SELECTED. THREAD AWAKE");
+			
+			waitNextWithFlag(moveFlag);
+			// User moved.
+			log.debug("USER MOVED. THREAD AWAKE");
+			
+			turn = (turn == Turn.black) ? Turn.white : Turn.black;
 		}
 	}
 	
@@ -48,8 +54,8 @@ public class GameThread implements Runnable {
 		return thread;
 	}
 	
-	public String[] getUsers() {
-		return new String[]{whitePlayer, blackPlayer};
+	public Player[] getUsers() {
+		return new Player[]{whitePlayer, blackPlayer};
 	}
 	
 	private void waitNext() {
@@ -63,6 +69,7 @@ public class GameThread implements Runnable {
 	}
 	
 	private void waitNextWithFlag(boolean flag) {
+		waitThread(flag);
 		while (flag) {
 			waitNext();
 		}
@@ -79,21 +86,44 @@ public class GameThread implements Runnable {
 	 *    {"type" : "SELECT_SUCCESS || SELECT_FAILED",
 	 *     "piece" : 선택한 위치에 있는 체스말의 ID,
 	 *     "tiles" : 선택한 위치에 있는 체스말이 갈 수 있는 타일들(Array),
-	 *     "error: : error code }d
+	 *     "error": : error code }
 	 * */
-	public String availableTiles(String userId, String tile) {
+	public String availableTiles(String tile, Player player) {
 		synchronized(thread) {
-			awakeThread();
+			awakeThread(selectFlag);
 			thread.notify();
 		}
-		return "[\"hello\"]";
+		return chessBoard.select(tile, player);
 	}
 	
-	private void awakeThread() {
-		this.waitFlag = false;
+	/*  GameCoreController에서 호출. 유저가 체스말을 움직이면 실행될 메서드.
+	 * 
+	 *  @Param
+	 *  String srcTile : 움직일 말의 위치
+	 *  String destTile : 목적지
+	 * 
+	 *  @Return
+	 *  JSON : 
+	 *    {"type" : "MOVE_SUCCESS || MOVE_FAILED",
+	 *     "error": : error code }
+	 * */
+	public String userMoveTile(String srcTile, String destTile) {
+		synchronized(thread) {
+			awakeThread(moveFlag);
+			thread.notify();
+		}
+		return chessBoard.move(srcTile, destTile);
 	}
 	
-	private void waitThread() {
-		this.waitFlag = true;
+	private void awakeThread(boolean flag) {
+		flag = false;
+	}
+	
+	private void waitThread(boolean flag) {
+		flag = true;
+	}
+	
+	public Player getPlayerById(String id) {
+		return id.equals(whitePlayer.getId()) ? whitePlayer : blackPlayer;
 	}
 } 

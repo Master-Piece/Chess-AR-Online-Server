@@ -10,6 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import chess_server.common.common.CommandMap;
 import chess_server.common.core.MatchMaker;
+import chess_server.common.core.Player;
 
 @Controller
 public class MatchMakingController {
@@ -28,10 +29,10 @@ public class MatchMakingController {
 	        if (type.equals("MMR")) {
 	        	MatchMaker mm = MatchMaker.getInstance();
 	        	
-	        	String id = (String)arg.get("id");
-//	        	String nick = (String)arg.get("nick");
+	        	String gcmToken = (String)arg.get("gcmToken");
+	        	String nick = (String)arg.get("nick");
 	        	
-	        	mm.enqueue(id);
+	        	mm.enqueue(new Player(gcmToken, nick));
 	        	mm.printQueue();
 	        }
 	        else {
