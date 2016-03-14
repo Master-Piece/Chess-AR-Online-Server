@@ -34,15 +34,6 @@ public class MatchMaker implements Runnable {
 	@Override
 	public void run() {
 		while (true) {
-//			log.debug("Match Maker waiting...");
-//			if (queue.isEmpty()) {
-//				try {
-//					getMatchMakingThread().wait();
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
 			if (checkQueue()) {
 				matchSuccess();
 			}
@@ -82,31 +73,7 @@ public class MatchMaker implements Runnable {
 		int queueSize = queue.size();
 		
 		for (int i = 0; i < queueSize; ++i) {
-			log.debug(String.format("[%d] %s", i, queue.get(i)));
+			log.debug(String.format("[%d] %s()", i, queue.get(i).getNickName(), queue.get(i).getId()));
 		}
-	}
-	
-	private Thread getMatchMakingThread() {
-		Thread mmThread = null;
-		
-		ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
-		ThreadGroup parentGroup;
-		while ((parentGroup = rootGroup.getParent()) != null) {
-		    rootGroup = parentGroup;
-		}
-		 
-		Thread[] threads = new Thread[rootGroup.activeCount()];
-		while (rootGroup.enumerate(threads, true) == threads.length) {
-		    threads = new Thread[threads.length * 2];
-		}
-		 
-		for (Thread t : threads) {
-		    if (t.getId() == threadId) {
-		        /* found it */
-		    	mmThread = t;
-		    }
-		}
-		
-		return mmThread;
 	}
 }

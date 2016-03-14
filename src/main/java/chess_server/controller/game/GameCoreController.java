@@ -21,6 +21,22 @@ public class GameCoreController {
 	public ModelAndView getCommand(CommandMap commandMap) throws Exception {
 		ModelAndView mv = new ModelAndView("");
 		
+		if (commandMap.isEmpty() == false) {
+			Map arg = commandMap.getMap();
+			String type = (String) arg.get("type");
+			String value = (String) arg.get("value");
+			
+			if (!type.equals("COMMAND"))
+				return mv;
+			
+			if (value.equals("select"))
+				return getTiles(commandMap);
+			else if (value.equals("move"))
+				return move(commandMap);
+			else 
+				return mv;
+		}
+		
 		return mv;
 	}
 	
