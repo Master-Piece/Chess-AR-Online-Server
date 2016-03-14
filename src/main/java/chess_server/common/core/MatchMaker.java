@@ -9,6 +9,7 @@ public class MatchMaker implements Runnable {
 	
 	private ArrayList<Player> queue;
 	private static long threadId;
+	private static int accumulateUsers;
 	
 	private static MatchMaker instance;
 	
@@ -18,6 +19,7 @@ public class MatchMaker implements Runnable {
 	
 	static {
 		try {
+			accumulateUsers = 0;
 			instance = new MatchMaker();
 			Thread thread = new Thread(getInstance());
 			threadId = Thread.currentThread().getId();
@@ -52,7 +54,7 @@ public class MatchMaker implements Runnable {
 	
 	public boolean enqueue(Player player) {
 		log.debug(String.format("User enqueued : %s(%s)", player.getNickName(), player.getId()));
-		
+		accumulateUsers++;
 		return queue.add(player);
 	}
 	
@@ -75,5 +77,9 @@ public class MatchMaker implements Runnable {
 		for (int i = 0; i < queueSize; ++i) {
 			log.debug(String.format("[%d] %s()", i, queue.get(i).getNickName(), queue.get(i).getId()));
 		}
+	}
+	
+	public int getAccumulateUsers() {
+		return accumulateUsers++;
 	}
 }

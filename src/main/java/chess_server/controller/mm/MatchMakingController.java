@@ -3,6 +3,7 @@ package chess_server.controller.mm;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,13 +31,27 @@ public class MatchMakingController {
 	        	MatchMaker mm = MatchMaker.getInstance();
 	        	
 	        	String gcmToken = (String)arg.get("gcmToken");
-	        	String nick = (String)arg.get("nick");
+//	        	String nick = (String)arg.get("nick");
+	        	String nick = "Player_" + MatchMaker.getInstance().getAccumulateUsers();
+	        	Player player = new Player(gcmToken, nick); 
 	        	
-	        	mm.enqueue(new Player(gcmToken, nick));
-	        	mm.printQueue();
+	        	JSONObject jsonObj = new JSONObject();
+	        	
+	        	if (!mm.enqueue(player)) {
+	        		jsonObj.put("type", "MMR_FAILED");
+	        	}
+	        	else {
+		        	mm.printQueue();
+		        	jsonObj.put("type", "MMR_SUCCESS");
+		        	jsonObj.put("id", player.getId());
+	        	}
+	        	mv.addObject("json", jsonObj.toJSONString());
 	        }
 	        else {
 	        	log.debug("Request type not valid");
+	        	JSONObject jsonObj = new JSONObject();
+	        	jsonObj.put("type", "MMR_FAILED");
+	        	mv.addObject("json", jsonObj.toJSONString());
 	        }
 	    }
 		

@@ -3,6 +3,7 @@ package chess_server.controller.game;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,12 +20,15 @@ public class GameCoreController {
 	
 	@RequestMapping(value="/game/command.cao", method=RequestMethod.GET)
 	public ModelAndView getCommand(CommandMap commandMap) throws Exception {
-		ModelAndView mv = new ModelAndView("");
+		ModelAndView mv = new ModelAndView("game/commandResult");
 		
 		if (commandMap.isEmpty() == false) {
 			Map arg = commandMap.getMap();
 			String type = (String) arg.get("type");
 			String value = (String) arg.get("value");
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put("type", "COMMAND_FAILED");
+			mv.addObject("json", jsonObj.toJSONString());
 			
 			if (!type.equals("COMMAND"))
 				return mv;
@@ -33,7 +37,7 @@ public class GameCoreController {
 				return getTiles(commandMap);
 			else if (value.equals("move"))
 				return move(commandMap);
-			else 
+			else
 				return mv;
 		}
 		
