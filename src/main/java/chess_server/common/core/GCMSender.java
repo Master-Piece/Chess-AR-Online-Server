@@ -13,8 +13,10 @@ public class GCMSender {
 	/* GCMSender instance. Initialize at once.
 	 * */
 	private static GCMSender instance;
+	private GameCoreManager gameCoreManager;
 	private GCMSender() {
 		sender = new Sender(API_KEY);
+		gameCoreManager = GameCoreManager.getInstance();
 	}
 	
 	private Sender sender;

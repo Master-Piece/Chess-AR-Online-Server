@@ -20,4 +20,16 @@ public class Algorithm implements UserRequest {
 		return null;
 	}
 
+	@Override
+	public boolean isEnd() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public String whoWin() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
