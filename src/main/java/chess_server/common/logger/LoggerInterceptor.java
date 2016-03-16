@@ -18,6 +18,8 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		if (log.isDebugEnabled()) {
 			log.debug(START_TAG);
+			log.debug("\tRequest Host\t:\t" + request.getRemoteAddr());
+			log.debug("\tRequest Method\t:\t" + request.getMethod());
 			log.debug("\tRequest URI\t:\t" + request.getRequestURI());
 		}
 		return super.preHandle(request, response, handler);

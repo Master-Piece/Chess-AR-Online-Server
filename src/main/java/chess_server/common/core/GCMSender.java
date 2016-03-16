@@ -45,7 +45,8 @@ public class GCMSender {
 			if (multiResult != null) {
 				List<Result> resultList = multiResult.getResults();
 				for (Result result : resultList) {
-					log.debug(result.getMessageId());
+//					log.debug(result.getMessageId());
+					log.debug(result.toString());
 				}
 			}
 		} catch (IOException e) {
@@ -54,7 +55,8 @@ public class GCMSender {
 		}
 	}
 	
-	public void sendTest(String token, String data) {
+	public String sendTest(String token, String data) {
+		String ret = "";
 		Message message = new Message.Builder().addData("data", data)
 				.build();
 		List<String> list = new ArrayList<String>();
@@ -65,12 +67,16 @@ public class GCMSender {
 			if (multiResult != null) {
 				List<Result> resultList = multiResult.getResults();
 				for (Result result : resultList) {
-					log.debug(result.getMessageId());
+//					log.debug(result.getMessageId());
+					log.debug(result.toString());
+					ret += result.toString() + "\n";
 				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		return ret;
 	}
 }

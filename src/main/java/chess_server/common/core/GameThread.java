@@ -38,7 +38,7 @@ public class GameThread implements Runnable {
 				game();
 				cTimer.reCount();
 			} catch (InterruptedException e) {
-				log.debug("Time out!!!");
+				log.info("Time out!!!");
 			} 
 		}
 	}
@@ -51,7 +51,7 @@ public class GameThread implements Runnable {
 			turn = (turn == Turn.black) ? Turn.white : Turn.black;
 		}
 		// TODO: gcm으로 턴을 알려줌
-		log.debug(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
+		log.info(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
 		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 	
 		waitNextWithFlag(selectFlag);

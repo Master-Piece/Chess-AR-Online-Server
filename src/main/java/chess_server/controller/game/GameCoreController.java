@@ -125,11 +125,12 @@ public class GameCoreController {
 	public ModelAndView gcmTest(CommandMap commandMap) throws Exception {
 		ModelAndView mv = new ModelAndView("gcm");
 		
-		if (commandMap.isEmpty() != false) {
+		if (commandMap.isEmpty() == false) {
 			String data = (String) commandMap.getMap().get("data");
 			String token = (String) commandMap.getMap().get("token");
 			log.debug(String.format("GCM request arrive: token: %s, data: %s", token, data));
-			GCMSender.getInstance().sendTest(token, data);
+			String tmp = GCMSender.getInstance().sendTest(token, data);
+			mv.addObject("json", tmp);
 		}
 		
 		return mv;
