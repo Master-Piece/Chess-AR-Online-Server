@@ -38,6 +38,8 @@ public class GameCoreController {
 				return getTiles(commandMap);
 			else if (value.equals("move"))
 				return move(commandMap);
+			else if (value.equals("surrender"))
+				return surrender(commandMap);
 			else
 				return mv;
 		}
