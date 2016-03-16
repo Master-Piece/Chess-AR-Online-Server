@@ -1,11 +1,17 @@
 package chess_server.common.core;
 
+import java.util.Timer;
+import java.util.concurrent.TimeoutException;
+
 import org.apache.log4j.Logger;
 
 public class GameThread implements Runnable {
 	Logger log = Logger.getLogger(this.getClass());
 	
 	enum Turn {white, black};
+	
+	GCMSender sender;
+	ChessTimer cTimer;
 	
 	Thread thread;
 	Player whitePlayer;
@@ -20,29 +26,40 @@ public class GameThread implements Runnable {
 		this.whitePlayer = whitePlayer;
 		this.blackPlayer = blackPlayer;
 		chessBoard = new Algorithm();
+		sender = GCMSender.getInstance();
 	}
 	
 	@Override
 	public void run() {
-		GCMSender sender = GCMSender.getInstance();
+		
 		while (gameFlag) {
-			// TODO: gcm으로 턴을 알려줌
-			sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
-			
-			waitNextWithFlag(selectFlag);
-			// User selected tile.
-			log.debug("USER SELECTED. THREAD AWAKE");
-			
-			waitNextWithFlag(moveFlag);
-			// User moved.
-			log.debug("USER MOVED. THREAD AWAKE");
-			
-			turn = (turn == Turn.black) ? Turn.white : Turn.black;
+			//try {
+				//cTimer.startCount(1000 * 40);
+				game();
+			//} catch (InterruptedException e) {
+			//	log.debug("Time out!!!");
+			//} 
 		}
+	}
+	
+	private void game() {
+		// TODO: gcm으로 턴을 알려줌
+		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
+		
+		waitNextWithFlag(selectFlag);
+		// User selected tile.
+		log.debug("USER SELECTED. THREAD AWAKE");
+		
+		waitNextWithFlag(moveFlag);
+		// User moved.
+		log.debug("USER MOVED. THREAD AWAKE");
+		
+		turn = (turn == Turn.black) ? Turn.white : Turn.black;
 	}
 	
 	public void startGame() {
 		thread = new Thread(this);
+		cTimer = new ChessTimer(thread); 
 		thread.start();
 	}
 	

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import chess_server.common.common.CommandMap;
+import chess_server.common.core.GCMSender;
 import chess_server.common.core.GameCoreManager;
 import chess_server.common.core.GameThread;
 import chess_server.common.core.Player;
@@ -115,6 +116,20 @@ public class GameCoreController {
 			
 			String json = gt.userMoveTile(srcTile, destTile);
 			mv.addObject("json", json);
+		}
+		
+		return mv;
+	}
+	
+	@RequestMapping(value="/gcmTest.cao", method=RequestMethod.POST)
+	public ModelAndView gcmTest(CommandMap commandMap) throws Exception {
+		ModelAndView mv = new ModelAndView("gcm");
+		
+		if (commandMap.isEmpty() != false) {
+			String data = (String) commandMap.getMap().get("data");
+			String token = (String) commandMap.getMap().get("token");
+			log.debug(String.format("GCM request arrive: token: %s, data: %s", token, data));
+			GCMSender.getInstance().sendTest(token, data);
 		}
 		
 		return mv;

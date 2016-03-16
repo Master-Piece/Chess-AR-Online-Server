@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 
 public class GCMSender {
+	Logger log = Logger.getLogger(this.getClass());
+	
 	/* GCMSender instance. Initialize at once.
 	 * */
 	private static GCMSender instance;
@@ -41,7 +45,27 @@ public class GCMSender {
 			if (multiResult != null) {
 				List<Result> resultList = multiResult.getResults();
 				for (Result result : resultList) {
-					System.out.println(result.getMessageId());
+					log.debug(result.getMessageId());
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendTest(String token, String data) {
+		Message message = new Message.Builder().addData("data", data)
+				.build();
+		List<String> list = new ArrayList<String>();
+		list.add(token);
+		MulticastResult multiResult;
+		try {
+			multiResult = sender.send(message, list, 5);
+			if (multiResult != null) {
+				List<Result> resultList = multiResult.getResults();
+				for (Result result : resultList) {
+					log.debug(result.getMessageId());
 				}
 			}
 		} catch (IOException e) {
