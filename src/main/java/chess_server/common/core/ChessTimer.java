@@ -29,7 +29,7 @@ public class ChessTimer implements Runnable {
 		this.chessThread = chessThread;
 	}
 	
-	public long startCount(long millis) throws InterruptedException {
+	public long startCount(long millis) {
 		waitTime = millis;
 		startTime = System.currentTimeMillis();
 		
@@ -39,6 +39,15 @@ public class ChessTimer implements Runnable {
 		thread = new Thread(this);
 		thread.start();
 		return thread.getId();
+	}
+	
+	public boolean reCount() {
+		try {
+			startTime = System.currentTimeMillis();
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 	
 	public long getTimerId() {

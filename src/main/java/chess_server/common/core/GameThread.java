@@ -4,6 +4,8 @@ package chess_server.common.core;
 import org.apache.log4j.Logger;
 
 public class GameThread implements Runnable {
+	private static final long GAME_COUNT = 1000 * 30;
+	
 	Logger log = Logger.getLogger(this.getClass());
 	
 	enum Turn {white, black};
@@ -32,8 +34,9 @@ public class GameThread implements Runnable {
 		
 		while (gameFlag) {
 			try {
-				cTimer.startCount(1000 * 5);
+				cTimer.startCount(GAME_COUNT);
 				game();
+				cTimer.reCount();
 			} catch (InterruptedException e) {
 				log.debug("Time out!!!");
 			} 
@@ -50,7 +53,7 @@ public class GameThread implements Runnable {
 		// TODO: gcm으로 턴을 알려줌
 		log.debug(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
 		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
-		
+	
 		waitNextWithFlag(selectFlag);
 		// User selected tile.
 		log.debug("USER SELECTED. THREAD AWAKE");
