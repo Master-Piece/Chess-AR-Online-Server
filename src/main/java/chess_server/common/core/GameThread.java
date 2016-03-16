@@ -1,7 +1,5 @@
 package chess_server.common.core;
 
-import java.util.Timer;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 
@@ -33,17 +31,24 @@ public class GameThread implements Runnable {
 	public void run() {
 		
 		while (gameFlag) {
-			//try {
-				//cTimer.startCount(1000 * 40);
+			try {
+				cTimer.startCount(1000 * 5);
 				game();
-			//} catch (InterruptedException e) {
-			//	log.debug("Time out!!!");
-			//} 
+			} catch (InterruptedException e) {
+				log.debug("Time out!!!");
+			} 
 		}
 	}
 	
-	private void game() {
+	private void game() throws InterruptedException {
+		if (turn == null) {
+			turn = Turn.white;
+		}
+		else {
+			turn = (turn == Turn.black) ? Turn.white : Turn.black;
+		}
 		// TODO: gcm으로 턴을 알려줌
+		log.debug(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
 		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 		
 		waitNextWithFlag(selectFlag);
@@ -53,8 +58,6 @@ public class GameThread implements Runnable {
 		waitNextWithFlag(moveFlag);
 		// User moved.
 		log.debug("USER MOVED. THREAD AWAKE");
-		
-		turn = (turn == Turn.black) ? Turn.white : Turn.black;
 	}
 	
 	public void startGame() {
@@ -75,17 +78,19 @@ public class GameThread implements Runnable {
 		return new Player[]{whitePlayer, blackPlayer};
 	}
 	
-	private void waitNext() {
-		try {
+	private void waitNext() throws InterruptedException {
+//		try {
 			synchronized(thread) {
 				thread.wait();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		} catch (InterruptedException ie) {
+//			throw new InterruptedException();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} 
 	}
 	
-	private void waitNextWithFlag(boolean flag) {
+	private void waitNextWithFlag(boolean flag) throws InterruptedException {
 		waitThread(flag);
 		while (flag) {
 			waitNext();

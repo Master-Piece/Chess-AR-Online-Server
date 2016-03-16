@@ -65,6 +65,9 @@ public class MatchMaker implements Runnable {
 		queue.remove(0);
 		queue.remove(0);
 		
+		user1.setColor(Player.WHITE);
+		user2.setColor(Player.BLACK);
+		
 		GameCoreManager gcm = GameCoreManager.getInstance();
 		gcm.startGame(user1, user2);
 		

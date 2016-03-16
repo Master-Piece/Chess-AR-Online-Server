@@ -7,12 +7,24 @@ public class Player {
 	private String gcmToken;
 	private String nickName;
 	private String id;
+	private String color;
+	
+	public static final String WHITE = "white";
+	public static final String BLACK = "black";
 	
 	public Player(String gcmToken, String nickName) {
 		this.gcmToken = gcmToken;
 		this.nickName = nickName;
 		
 		this.id = getMD5(gcmToken + ":" + nickName);
+	}
+	
+	public void setColor(String color) {
+		this.color = color;
+	}
+	
+	public String getColor() {
+		return color;
 	}
 	
 	public String getGcmToken() {
