@@ -118,12 +118,13 @@ public class GameThread implements Runnable {
 			awakeThread(selectFlag);
 			thread.notify();
 		}
-		return chessBoard.select(tile, player);
+		return chessBoard.select(player, tile);
 	}
 	
 	/*  GameCoreController에서 호출. 유저가 체스말을 움직이면 실행될 메서드.
 	 * 
 	 *  @Param
+	 *  Player player : 움직이는 사람
 	 *  String srcTile : 움직일 말의 위치
 	 *  String destTile : 목적지
 	 * 
@@ -132,12 +133,26 @@ public class GameThread implements Runnable {
 	 *    {"type" : "MOVE_SUCCESS || MOVE_FAILED",
 	 *     "error": : error code }
 	 * */
-	public String userMoveTile(String srcTile, String destTile) {
+	public String userMoveTile(Player player, String srcTile, String destTile) {
 		synchronized(thread) {
 			awakeThread(moveFlag);
 			thread.notify();
 		}
-		return chessBoard.move(srcTile, destTile);
+		return chessBoard.move(player, srcTile, destTile);
+	}
+	
+	/*  GameCoreController에서 호출. 유저가 자신의 턴에 항복 선언
+	 * 
+	 *  @Param
+	 *  Player player : 항복을 선언한 유저
+	 *  
+	 *  @Return
+	 *  JSON :
+	 *    {"type" : "SURRENDER_ACCEPT" || "SURRENDER_FAILED",
+	 *     "error" : error_code }
+	 */
+	public String userSurrender(Player player) {
+		return chessBoard.surrender(player);
 	}
 	
 	private void awakeThread(boolean flag) {

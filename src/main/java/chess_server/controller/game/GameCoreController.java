@@ -52,9 +52,9 @@ public class GameCoreController {
 		GameCoreManager gcm = GameCoreManager.getInstance();
 		if(commandMap.isEmpty() == false){
 			Map arg = commandMap.getMap();
-	        String sessionId = (String) arg.get("sessionId");
+	        String sessionKey = (String) arg.get("sessionKey");
 	        
-	        GameThread gt = gcm.getGame(Long.parseLong(sessionId));
+	        GameThread gt = gcm.getGame(Long.parseLong(sessionKey));
 	        
 	        Player[] users = gt.getUsers();
 	        
@@ -79,11 +79,11 @@ public class GameCoreController {
 				return mv;
 			}
 			
-			long sessionId = Long.parseLong((String)arg.get("sessionId"));
+			long sessionKey = Long.parseLong((String)arg.get("sessionKey"));
 			String userId = (String) arg.get("userId");
 			String tile = (String) arg.get("tile");
 			
-			GameThread gt = gcm.getGame(sessionId);
+			GameThread gt = gcm.getGame(sessionKey);
 			String json = gt.availableTiles(tile, gt.getPlayerById(userId));
 			
 			mv.addObject("json", json);
@@ -107,15 +107,39 @@ public class GameCoreController {
 				return mv;
 			}
 			
-			long sessionId = Long.parseLong((String) arg.get("sessionId"));
+			long sessionKey = Long.parseLong((String) arg.get("sessionKey"));
 			String userId = (String) arg.get("userId");
 			String srcTile = (String) arg.get("srcTile");
 			String destTile = (String) arg.get("destTile");
 			
-			GameThread gt = gcm.getGame(sessionId);
+			GameThread gt = gcm.getGame(sessionKey);
 			
-			String json = gt.userMoveTile(srcTile, destTile);
+			String json = gt.userMoveTile(gt.getPlayerById(userId), srcTile, destTile);
 			mv.addObject("json", json);
+		}
+		
+		return mv;
+	}
+	
+	@RequestMapping(value="/game/surrender.cao", method=RequestMethod.POST)
+	public ModelAndView surrender(CommandMap commandMap) throws Exception {
+		ModelAndView mv = new ModelAndView("game/surrender");
+		
+		if (commandMap.isEmpty() == false) {
+			Map<String, Object> arg = commandMap.getMap();
+			
+			String type = (String) arg.get("type");
+			String value = (String) arg.get("value");
+			
+			if (!type.equals("COMMAND") || !value.equals("surrender")) {
+				return mv;
+			}
+			
+			long sessionKey = Long.parseLong((String) arg.get("sessionKey"));
+			String userId = (String) arg.get("userId");
+			
+			GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
+			gt.userSurrender(gt.getPlayerById(userId));
 		}
 		
 		return mv;

@@ -1,8 +1,8 @@
 package chess_server.common.core;
 
 public interface UserRequest {
-	public String move(String srcTile, String destTile);
-	public String select(String tile, Player player);
+	public String move(Player player, String srcTile, String destTile);
+	public String select(Player player, String tile);
 	public String surrender(Player player);
 	public boolean isEnd();
 	
