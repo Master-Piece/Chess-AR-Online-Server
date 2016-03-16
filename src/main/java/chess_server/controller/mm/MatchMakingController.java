@@ -17,7 +17,7 @@ import chess_server.common.core.Player;
 public class MatchMakingController {
 	Logger log = Logger.getLogger(this.getClass());
 	
-	@RequestMapping(value="/mm/matchRequest.cao", method=RequestMethod.GET)
+	@RequestMapping(value="/mm/matchRequest.cao", method=RequestMethod.POST)
 	public ModelAndView matchMaking(CommandMap commandMap) throws Exception {
 		ModelAndView mv = new ModelAndView("matchResult");
 

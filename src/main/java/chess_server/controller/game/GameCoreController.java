@@ -19,7 +19,7 @@ import chess_server.common.core.Player;
 public class GameCoreController {
 	Logger log = Logger.getLogger(this.getClass());
 	
-	@RequestMapping(value="/game/command.cao", method=RequestMethod.GET)
+	@RequestMapping(value="/game/command.cao", method=RequestMethod.POST)
 	public ModelAndView getCommand(CommandMap commandMap) throws Exception {
 		ModelAndView mv = new ModelAndView("game/commandResult");
 		
@@ -45,7 +45,7 @@ public class GameCoreController {
 		return mv;
 	}
 	
-	@RequestMapping(value="/game/users.cao", method=RequestMethod.GET)
+	@RequestMapping(value="/game/users.cao", method=RequestMethod.POST)
 	public ModelAndView getUsers(CommandMap commandMap) throws Exception {
 		ModelAndView mv = new ModelAndView("game/getUsers");
 		
@@ -64,7 +64,7 @@ public class GameCoreController {
 		return mv;
 	}
 	
-	@RequestMapping(value="/game/tiles.cao", method=RequestMethod.GET)
+	@RequestMapping(value="/game/tiles.cao", method=RequestMethod.POST)
 	public ModelAndView getTiles(CommandMap commandMap) throws Exception {
 		ModelAndView mv = new ModelAndView("game/getTiles");
 		
@@ -92,7 +92,7 @@ public class GameCoreController {
 		return mv;
 	}
 	
-	@RequestMapping(value="/game/move.cao", method=RequestMethod.GET)
+	@RequestMapping(value="/game/move.cao", method=RequestMethod.POST)
 	public ModelAndView move(CommandMap commandMap) throws Exception {
 		ModelAndView mv = new ModelAndView("game/move");
 		
