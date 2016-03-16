@@ -22,7 +22,7 @@ public class MatchMakingController {
 		ModelAndView mv = new ModelAndView("matchResult");
 
 		if(commandMap.isEmpty() == false){
-			Map arg = commandMap.getMap();
+			Map<String, Object> arg = commandMap.getMap();
 			
 	        String type = (String) arg.get("type");
 	        log.debug("type: " + type);
