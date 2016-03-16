@@ -28,6 +28,11 @@ public class GameCoreManager {
 		GameThread gt = new GameThread(player_1, player_2);
 		gt.startGame();
 		gameThreadPool.put(gt.getThreadId(), gt);
+		
+		GCMSender sender = GCMSender.getInstance();
+		sender.matchSuccessNotice(player_1, gt.getThreadId());
+		sender.matchSuccessNotice(player_2, gt.getThreadId());
+		
 		log.debug("Match Success(" + gt.getThreadId() + "): " + player_1.getNickName() + " VS "+ player_2.getNickName());
 	}
 	
