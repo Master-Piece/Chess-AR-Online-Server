@@ -6,11 +6,11 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
-	<title>Insert title here</title>
+	<title>Chess AR Online Server Program Manager</title>
 	
 	<style>
 		body {
-			width: 100%;
+			width: calc(100% - 16px);
 		}
 		
 		#statusPanel {

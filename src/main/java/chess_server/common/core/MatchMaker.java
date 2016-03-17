@@ -10,7 +10,7 @@ public class MatchMaker implements Runnable {
 	private ArrayList<Player> queue;
 	private static long threadId;
 	private static int accumulateUsers;
-	private boolean isRunning;
+	private boolean isRunning = true;;
 	private static Thread thread;
 	
 	private static MatchMaker instance;
