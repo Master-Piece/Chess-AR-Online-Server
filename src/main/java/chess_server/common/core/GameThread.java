@@ -125,7 +125,7 @@ public class GameThread implements Runnable {
 			awakeThread(selectFlag);
 			thread.notify();
 		}
-		return chessBoard.select(player, tile);
+		return chessBoard.select(player, tile).toJSONString();
 	}
 	
 	/*  GameCoreController에서 호출. 유저가 체스말을 움직이면 실행될 메서드.
@@ -145,7 +145,7 @@ public class GameThread implements Runnable {
 			awakeThread(moveFlag);
 			thread.notify();
 		}
-		return chessBoard.move(player, srcTile, destTile);
+		return chessBoard.move(player, srcTile, destTile).toJSONString();
 	}
 	
 	/*  GameCoreController에서 호출. 유저가 자신의 턴에 항복 선언
@@ -159,7 +159,7 @@ public class GameThread implements Runnable {
 	 *     "error" : error_code }
 	 */
 	public String userSurrender(Player player) {
-		return chessBoard.surrender(player);
+		return chessBoard.surrender(player).toJSONString();
 	}
 	
 	private void awakeThread(boolean flag) {
