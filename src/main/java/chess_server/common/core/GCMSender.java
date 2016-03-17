@@ -55,7 +55,7 @@ public class GCMSender {
 			if (multiResult != null) {
 				List<Result> resultList = multiResult.getResults();
 				for (Result result : resultList) {
-					log.debug(result.toString());
+					log.debug("matchSuccessNotice" + result.toString());
 				}
 			}
 		} catch (IOException e) {
@@ -83,8 +83,7 @@ public class GCMSender {
 			if (multiResult != null) {
 				List<Result> resultList = multiResult.getResults();
 				for (Result result : resultList) {
-//					log.debug(result.getMessageId());
-					log.debug(result.toString());
+					log.debug("noticeTurn: " + result.toString());
 				}
 			}
 		} catch (IOException e) {
@@ -105,7 +104,6 @@ public class GCMSender {
 			if (multiResult != null) {
 				List<Result> resultList = multiResult.getResults();
 				for (Result result : resultList) {
-//					log.debug(result.getMessageId());
 					log.debug(result.toString());
 					ret += result.toString() + "\n";
 				}

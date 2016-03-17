@@ -59,7 +59,7 @@ public class GameThread implements Runnable {
 		}
 		// TODO: gcm으로 턴을 알려줌
 		info(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
-		//sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
+		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 	
 		waitNextWithFlag(selectFlag);
 		// User selected tile.
