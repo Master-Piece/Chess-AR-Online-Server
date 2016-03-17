@@ -65,7 +65,15 @@ public class GCMSender {
 	}
 	
 	public void noticeTurn(String regId) {
-		Message message = new Message.Builder().addData("data", "TURN_RESPONSE_HERE")
+		JSONObject json = new JSONObject();
+		
+		json.put("type", "YOUR_TURN");
+		json.put("piece", "WP1");
+		json.put("tile", "D4");
+		
+		log.debug("notice turn to " + regId);
+		
+		Message message = new Message.Builder().addData("data", json.toJSONString())
 				.build();
 		List<String> list = new ArrayList<String>();
 		list.add(regId);
