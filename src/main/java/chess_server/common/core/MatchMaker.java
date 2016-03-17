@@ -101,6 +101,7 @@ public class MatchMaker implements Runnable {
 	}
 	
 	public void stopRunning() {
+		log.info("MatchMaker going to sleep...");
 		isRunning = false;
 	}
 	
@@ -109,6 +110,7 @@ public class MatchMaker implements Runnable {
 		synchronized(thread) {
 			thread.notify();
 		}
+		log.info("MatchMaker awaked");
 	}
 	
 	public boolean isMMRunning() {
