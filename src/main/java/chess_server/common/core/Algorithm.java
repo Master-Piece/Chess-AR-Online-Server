@@ -14,31 +14,57 @@ public class Algorithm implements UserRequest {
 			{"BR2","BN2","BB2","BQ","BK","BB1","BN1","BR1"}};
 	
 	
-	private String readMap(String tile){
-		int y = tile.charAt(0) - 'a', x = tile.charAt(1) - '0';		
-		return board[x][y];
+	private String getUnit(String tile){
+		int x[]= getPosition(tile);
+		return board[x[0]][x[1]];
 	}
 	
-	public String move(Player player, String srcTile, String destTile) {
+	private int[] getPosition(String tile){
+		int x[] = {tile.charAt(1) - '0',  tile.charAt(0) - 'a'};
+		return x;
+	}
+	
+	public JSONObject move(Player player, String srcTile, String destTile) {
 		String color = player.getColor();
 		
-		String src_unit = readMap(srcTile);
+		String src_unit = getUnit(srcTile);
 		
-		String dest_unit = readMap(destTile);
+		String dest_unit = getUnit(destTile);
 		
 		return null;
 	}
 
+	private String getMovable(String tile){
+		String moves = "[";
+		int position[] = getPosition(tile);
+		String unit = getUnit(tile);
+		
+		
+		moves += "]";
+		return moves;
+	}
+	
 	@Override
 	public JSONObject select(Player player, String tile) {
 		JSONObject message = new JSONObject();
-		String unit = readMap(tile);
+		String unit = getUnit(tile);
 		char color = player.getColor().charAt(0);
+		color = Character.toUpperCase(color);
+		
 		if( color == unit.charAt(0)){
+			//이동가능한 타일들 모아서 보내줌
+			String moves = getMovable(tile);
 			
+			message.put("type", "SELECT_SUCCESS");
+			message.put("piece",  unit);
+			message.put("tiles", moves);
+			message.put("error", "");
 		}
 		else{
-			
+			message.put("type", "SELECT_FAILED");
+			message.put("piece",  "");
+			message.put("tiles", "");
+			message.put("error", "");
 		}
 			
 			
@@ -46,7 +72,7 @@ public class Algorithm implements UserRequest {
 	}
 
 	@Override
-	public String surrender(Player player) {
+	public JSONObject surrender(Player player) {
 		// TODO Auto-generated method stub
 		return null;
 	}
