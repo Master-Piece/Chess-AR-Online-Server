@@ -35,6 +35,7 @@ public class MatchMakingController {
 	        	String nick = "Player_" + MatchMaker.getInstance().getAccumulateUsers();
 	        	Player player = new Player(gcmToken, nick); 
 	        	
+	        	log.info("gcmToken: " + gcmToken);
 	        	JSONObject jsonObj = new JSONObject();
 	        	
 	        	if (!mm.enqueue(player)) {

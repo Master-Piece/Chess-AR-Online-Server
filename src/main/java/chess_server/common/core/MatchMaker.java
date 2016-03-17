@@ -10,6 +10,8 @@ public class MatchMaker implements Runnable {
 	private ArrayList<Player> queue;
 	private static long threadId;
 	private static int accumulateUsers;
+	private boolean isRunning;
+	private static Thread thread;
 	
 	private static MatchMaker instance;
 	
@@ -21,7 +23,7 @@ public class MatchMaker implements Runnable {
 		try {
 			accumulateUsers = 0;
 			instance = new MatchMaker();
-			Thread thread = new Thread(getInstance());
+			thread = new Thread(getInstance());
 			threadId = Thread.currentThread().getId();
 			thread.start();
 		} catch (Exception e) {
@@ -35,7 +37,15 @@ public class MatchMaker implements Runnable {
 	
 	@Override
 	public void run() {
+		isRunning = true;
 		while (true) {
+			while (!isRunning) {
+				synchronized(thread) {
+					try {
+						thread.wait();
+					} catch (InterruptedException e) {}
+				}
+			}
 			if (checkQueue()) {
 				matchSuccess();
 			}
@@ -83,6 +93,25 @@ public class MatchMaker implements Runnable {
 	}
 	
 	public int getAccumulateUsers() {
-		return accumulateUsers++;
+		return accumulateUsers;
+	}
+	
+	public Player[] getPlayersInQueue() {
+		return queue.toArray(new Player[queue.size()]);
+	}
+	
+	public void stopRunning() {
+		isRunning = false;
+	}
+	
+	public void resumeRunning() {
+		isRunning = true;
+		synchronized(thread) {
+			thread.notify();
+		}
+	}
+	
+	public boolean isMMRunning() {
+		return isRunning;
 	}
 }

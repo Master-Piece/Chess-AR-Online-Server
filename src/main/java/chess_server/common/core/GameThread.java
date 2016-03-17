@@ -4,7 +4,10 @@ package chess_server.common.core;
 import org.apache.log4j.Logger;
 
 public class GameThread implements Runnable {
-	private static final long GAME_COUNT = 1000 * 30;
+	private static final long MINUTE = 1000 * 60;
+	private static final long SECOND = 1000;
+	
+	private static final long GAME_COUNT = 3 * MINUTE;
 	
 	Logger log = Logger.getLogger(this.getClass());
 	
@@ -38,7 +41,11 @@ public class GameThread implements Runnable {
 				game();
 				cTimer.reCount();
 			} catch (InterruptedException e) {
-				log.info("Time out!!!");
+				info("Time out!!! " + ((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "LOSE");
+				info("END SESSION");
+				//sender.sendTest(((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken()), "TIMEOUT");
+				//sender.sendTest((!(turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken()), "OPPONENT TIMEOUT");
+				break;
 			} 
 		}
 	}
@@ -51,8 +58,8 @@ public class GameThread implements Runnable {
 			turn = (turn == Turn.black) ? Turn.white : Turn.black;
 		}
 		// TODO: gcm으로 턴을 알려줌
-		log.info(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
-		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
+		info(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
+		//sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 	
 		waitNextWithFlag(selectFlag);
 		// User selected tile.
@@ -165,5 +172,13 @@ public class GameThread implements Runnable {
 	
 	public Player getPlayerById(String id) {
 		return id.equals(whitePlayer.getId()) ? whitePlayer : blackPlayer;
+	}
+	
+	private void info(String message) {
+		log.info(String.format("[%d] %s", getThreadId(), message));
+	}
+	
+	public void endGame() {
+		thread.interrupt();
 	}
 } 
