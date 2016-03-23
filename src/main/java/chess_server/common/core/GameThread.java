@@ -9,21 +9,21 @@ public class GameThread implements Runnable {
 	
 	private static final long GAME_COUNT = 3 * MINUTE;
 	
-	Logger log = Logger.getLogger(this.getClass());
+	private Logger log = Logger.getLogger(this.getClass());
 	
 	enum Turn {white, black};
 	
-	GCMSender sender;
-	ChessTimer cTimer;
+	private GCMSender sender;
+	private ChessTimer cTimer;
 	
-	Thread thread;
-	Player whitePlayer;
-	Player blackPlayer;
-	Algorithm chessBoard;
-	Turn turn;
-	boolean gameFlag = true; // 게임 종료 또는 항복시 false
-	boolean moveFlag = true; // move시 false
-	boolean selectFlag = true; // select시 false
+	private Thread thread;
+	private Player whitePlayer;
+	private Player blackPlayer;
+	private Algorithm chessBoard;
+	private Turn turn;
+	private boolean gameFlag = true; // 게임 종료 또는 항복시 false
+	private boolean moveFlag = true; // move시 false
+	private boolean selectFlag = true; // select시 false
 	
 	public GameThread(Player whitePlayer, Player blackPlayer) {
 		this.whitePlayer = whitePlayer;
@@ -48,6 +48,8 @@ public class GameThread implements Runnable {
 				break;
 			} 
 		}
+		
+		GameCoreManager.getInstance().closeSession(getSessionKey());
 	}
 	
 	private void game() throws InterruptedException {
@@ -76,7 +78,7 @@ public class GameThread implements Runnable {
 		thread.start();
 	}
 	
-	public long getThreadId() {
+	public long getSessionKey() {
 		return thread.getId();
 	}
 	
@@ -175,7 +177,7 @@ public class GameThread implements Runnable {
 	}
 	
 	private void info(String message) {
-		log.info(String.format("[%d] %s", getThreadId(), message));
+		log.info(String.format("[%d] %s", getSessionKey(), message));
 	}
 	
 	public void endGame() {

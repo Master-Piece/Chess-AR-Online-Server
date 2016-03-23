@@ -62,7 +62,7 @@ public class ManagerController {
 		
 		GameCoreManager gcm = GameCoreManager.getInstance();
 		long sessionKey = Long.parseLong((String) commandMap.get("sessionKey"));
-		gcm.endGame(sessionKey);
+		gcm.forceEndGame(sessionKey);
 		
 		
 		json.put("status", "Exit");
