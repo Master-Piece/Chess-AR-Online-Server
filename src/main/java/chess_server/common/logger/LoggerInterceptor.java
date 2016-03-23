@@ -1,5 +1,8 @@
 package chess_server.common.logger;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,6 +24,13 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
 			log.debug("\tRequest Host\t:\t" + request.getRemoteAddr());
 			log.debug("\tRequest Method\t:\t" + request.getMethod());
 			log.debug("\tRequest URI\t:\t" + request.getRequestURI());
+			log.debug("\tRequest Parameter\t:");
+			Map parameter = request.getParameterMap();
+			Iterator keyIter = parameter.keySet().iterator();
+			while(keyIter.hasNext()) {
+				String key = (String)keyIter.next();
+				log.debug(key + " => " + request.getParameter(key));
+			}
 		}
 		return super.preHandle(request, response, handler);
 	}

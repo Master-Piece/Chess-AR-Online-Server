@@ -44,12 +44,28 @@ public class ManagerController {
 		
 		long sessionKey = Long.parseLong((String) commandMap.getMap().get("sessionKey"));
 		
-		Player[] users = GameCoreManager.getInstance().getGame(sessionKey).getUsers();
+		GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
+		Player[] users = gt.getUsers();
 		
-		ret = String.format("[%d] %s(%s) - %s Vs %s(%s) - %s", sessionKey, users[0].getNickName(), users[0].getId(), users[0].getColor(), users[1].getNickName(), users[1].getId(), users[1].getColor());
+		JSONObject json = new JSONObject();
+		json.put("sessionKey", sessionKey);
+		json.put("turn", gt.getTurn());
+		JSONObject white = new JSONObject();
+		JSONObject black = new JSONObject();
+		int whiteIndex = users[0].getColor().equals("white") ? 0 : 1;
+		int blackIndex = users[0].getColor().equals("white") ? 1 : 0;
+		white.put("nick", users[whiteIndex].getNickName());
+		white.put("id", users[whiteIndex].getId());
+		white.put("phase", users[whiteIndex].getPhase());
+		black.put("nick", users[blackIndex].getNickName());
+		black.put("id", users[blackIndex].getId());
+		black.put("phase", users[blackIndex].getPhase());
+		
+		json.put("white", white);
+		json.put("black", black);
 		
 		try {
-			response.getWriter().print(ret);
+			response.getWriter().print(json.toJSONString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -78,9 +94,9 @@ public class ManagerController {
 	@RequestMapping(value="manager/createGame.cao", method=RequestMethod.POST)
 	public void createNewGame(CommandMap commandMap, HttpServletResponse response) {
 		String wNick = (String) commandMap.get("wnick");
-		String wGcmToken = (String) commandMap.get("wtoken");
+		String wGcmToken = (String) commandMap.get("wgcmToken");
 		String bNick = (String) commandMap.get("bnick");
-		String bGcmToken = (String) commandMap.get("btoken");
+		String bGcmToken = (String) commandMap.get("bgcmToken");
 		
 		Player whitePlayer = new Player(wGcmToken, wNick);
 		whitePlayer.setColor(Player.WHITE);
@@ -147,5 +163,28 @@ public class ManagerController {
 		MatchMaker mm = MatchMaker.getInstance();
 		if (!mm.isMMRunning())
 			mm.resumeRunning();
+	}
+	
+	@RequestMapping(value="manager/turnOver.cao", method=RequestMethod.POST)
+	public void turnOver(CommandMap commandMap, HttpServletResponse response) {
+		long sessionKey = Long.parseLong((String) commandMap.get("sessionKey"));
+		String playerColor = (String) commandMap.get("player");
+		
+		JSONObject json = new JSONObject();
+		
+		GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
+		if (gt.getTurn().equals(playerColor)) {
+			gt.turnOver();
+			json.put("status", "SUCCESS");
+		}
+		else {
+			json.put("status", "FAILED");
+		}
+		
+		try {
+			response.getWriter().print(json.toJSONString());
+		} catch (Exception e) {
+			
+		}
 	}
 }

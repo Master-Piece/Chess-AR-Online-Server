@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 
 import chess_server.common.common.CommandMap;
 import chess_server.common.core.GCMSender;
@@ -34,14 +35,15 @@ public class GameCoreController {
 			if (!type.equals("COMMAND"))
 				return mv;
 			
-			if (value.equals("select"))
-				return getTiles(commandMap);
-			else if (value.equals("move"))
-				return move(commandMap);
-			else if (value.equals("surrender"))
-				return surrender(commandMap);
-			else
-				return mv;
+//			if (value.equals("select"))
+//				return getTiles(commandMap);
+//			else if (value.equals("move"))
+//				return move(commandMap);
+//			else if (value.equals("surrender"))
+//				return surrender(commandMap);
+//			else
+//				return mv;
+			return test(commandMap, value);
 		}
 		
 		return mv;
@@ -142,6 +144,11 @@ public class GameCoreController {
 			
 			GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
 			gt.userSurrender(gt.getPlayerById(userId));
+			
+			GCMSender sender = GCMSender.getInstance();
+			sender.surrenderNotice(sessionKey, userId);
+			
+			GameCoreManager.getInstance().closeSession(sessionKey);
 		}
 		
 		return mv;
@@ -160,5 +167,16 @@ public class GameCoreController {
 		}
 		
 		return mv;
+	}
+	
+	public ModelAndView test(CommandMap commandMap, String value) throws Exception {
+		if (value.equals("select"))
+			return new ModelAndView("game/selectTestPage");
+		else if (value.equals("move"))
+			return new ModelAndView("game/moveTestPage");
+		else if (value.equals("surrender"))
+			return surrender(commandMap);
+		else
+			return new ModelAndView();
 	}
 }

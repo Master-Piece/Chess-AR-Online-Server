@@ -131,12 +131,7 @@
 			});
 			
 			$('#run').bind('click', function() {
-				if(!$('#enqueueDiv').hasClass('hide')) {
-					$('#enqueueDiv').addClass('hide')
-				}
-				if( $('#newGameDiv').hasClass('hide')) {
-					$('#newGameDiv').removeClass('hide')
-				}
+				toggleInputPanel($('#newGameDiv'));
 			});
 			
 			$('#enqueue').bind('click', enqueueHandler);
@@ -203,14 +198,64 @@
 				$('#refreshBtns .off > button').prop('disabled', true);
 				$('#refreshBtns .on > button').prop('disabled', false);
 			});
+			
+			$('.turnOverBtn').bind('click', function() {
+				var sessionKey = $('#gameInfo').attr('data');
+				var player = $(this).attr('data');
+				$.ajax({
+					method: 'post',
+					url: 'turnOver.cao', 
+					data: {
+						sessionKey: sessionKey,
+						player: player
+						}
+				}).success(function(data) {
+					var response = JSON.parse(data);
+					
+					if (response['status'] == 'SUCCESS') {
+						if (response['nowTurn'] == 'white') {
+							$('.turnOverBtn[data="white"]').prop('disabled', false);
+							$('.turnOverBtn[data="black"]').prop('disabled', true);
+						}
+						else {
+							$('.turnOverBtn[data="white"]').prop('disabled', true);
+							$('.turnOverBtn[data="black"]').prop('disabled', false);
+						}
+					}
+					else {
+						alert("error!");
+					}
+					
+					location.reload();
+				});
+			});
+			
 		})
 		
 		var gameHandler = function() {
-			var sessionId = $(this).text();
-			$('#gameInfo').attr('data', sessionId);
+			var sessionKey = $(this).text();
+			$('#gameInfo').attr('data', sessionKey);
 			
-			$.ajax({method: "post", url: 'getGameInfo.cao', data: {sessionKey: sessionId}}).done(function(data) {
-				$('#gameInfo').text(data);
+			toggleInputPanel($('#gameInfo'));
+			
+			$.ajax({method: "post", url: 'getGameInfo.cao', data: {sessionKey: sessionKey}}).done(function(data) {
+				//$('#gameInfo').text(data);
+				var json = JSON.parse(data);
+				var white = json['white'];
+				var black = json['black'];
+				var turn = json['turn'];
+				
+				$('#whiteField > p:eq(0)').text(white['nick'] + '(' + white['id'] + ')');
+				$('#whiteField > p:eq(1) > span').text(white['phase']);
+				$('#blackField > p:eq(0)').text(black['nick'] + '(' + black['id'] + ')');
+				$('#blackField > p:eq(1) > span').text(black['phase']);
+				
+				if (turn == "white") {
+					$('#whiteField > button').prop('disabled', false);
+				}
+				else {
+					$('#blackField > button').prop('disabled', false);
+				}
 			});
 			
 			if ($('#exitGame').hasClass('hide')) {
@@ -219,12 +264,7 @@
 		}
 		
 		var enqueueHandler = function() {
-			if(!$('#newGameDiv').hasClass('hide')) {
-				$('#newGameDiv').addClass('hide')
-			}
-			if( $('#enqueueDiv').hasClass('hide')) {
-				$('#enqueueDiv').removeClass('hide')
-			}
+			toggleInputPanel($('#enqueueDiv'));
 		}
 		
 
@@ -244,6 +284,11 @@
 				
 				$('.game').bind('click', gameHandler);
 			})
+		}
+		
+		var toggleInputPanel = function(target) {
+			$('#inputPanel > div').addClass('hide');
+			target.removeClass('hide');
 		}
 	</script>
 </head>
@@ -284,7 +329,6 @@
 			<li class="game"><c:out value="${game}" /></li>
 		</c:forEach>
 		</ul>
-		<div id="gameInfo"></div>
 		
 		<button id="exitGame" class="hide">Exit Game</button>
 		<button id="run">Run New Game</button>
@@ -323,6 +367,21 @@
 				</fieldset>
 				<input type="submit" value="Enqueue!" id="enqueueSubmit">
 			</form>
+		</div>
+		<div id="gameInfo" class="hide">
+			<fieldset id="whiteField">
+				<legend>White Player</legend>
+				<p>NickName(IDIDIDIDIDIDIDIDIDIDIDIDIDI)</p>
+				<p>Phase: <span></span></p>
+				<button class="turnOverBtn" data="white" disabled>Turn Over</button>
+			</fieldset>
+			<span>VS</span>
+			<fieldset id="blackField">
+				<legend>Black Player</legend>
+				<p>NickName(IDIDIDIDIDIDIDIDIDIDIDIDIDI)</p>
+				<p>Phase: <span></span></p>
+				<button class="turnOverBtn" data="black" disabled>Turn Over</button>
+			</fieldset>
 		</div>
 	</div>	
 </body>
