@@ -27,27 +27,35 @@ public class GameCoreManager {
 	public long startGame(Player player_1, Player player_2) {
 		GameThread gt = new GameThread(player_1, player_2);
 		gt.startGame();
-		gameThreadPool.put(gt.getThreadId(), gt);
+		gameThreadPool.put(gt.getSessionKey(), gt);
 		
 		GCMSender sender = GCMSender.getInstance();
-		sender.matchSuccessNotice(player_1, gt.getThreadId());
-		sender.matchSuccessNotice(player_2, gt.getThreadId());
+		sender.matchSuccessNotice(player_1, gt.getSessionKey());
+		sender.matchSuccessNotice(player_2, gt.getSessionKey());
 		
-		log.debug("Match Success(" + gt.getThreadId() + "): " + player_1.getNickName() + " VS "+ player_2.getNickName());
+		log.debug("Match Success(" + gt.getSessionKey() + "): " + player_1.getNickName() + " VS "+ player_2.getNickName());
 		
-		return gt.getThreadId();
+		return gt.getSessionKey();
 	}
 	
-	public GameThread getGame(long threadId) {
-		return gameThreadPool.get(threadId);
+	public GameThread getGame(long sessionKey) {
+		return gameThreadPool.get(sessionKey);
 	}
 	
 	public Long[] getGameList() {
 		return gameThreadPool.keySet().toArray(new Long[gameThreadPool.size()]);
 	}
 	
-	public void endGame(long threadId) {
-		gameThreadPool.get(threadId).endGame();
-		gameThreadPool.remove(threadId);
+	public void forceEndGame(long sessionKey) {
+		gameThreadPool.get(sessionKey).endGame();
+		gameThreadPool.remove(sessionKey);
+	}
+	
+	public void closeSession(long sessionKey) {
+		gameThreadPool.remove(sessionKey);
+	}
+	
+	public boolean checkSessionExist(long sessionKey) {
+		return gameThreadPool.containsKey(sessionKey);
 	}
 }

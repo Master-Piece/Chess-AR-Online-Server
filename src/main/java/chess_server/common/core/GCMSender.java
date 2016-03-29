@@ -45,38 +45,51 @@ public class GCMSender {
 		
 		String jsonString = json.toJSONString();
 		
-		Message message = new Message.Builder().addData("data", jsonString).build();
-		
-		List<String> list = new ArrayList<String>();
-		list.add(player.getGcmToken());
-		MulticastResult multiResult;
-		try {
-			multiResult = sender.send(message, list, 5);
-			if (multiResult != null) {
-				List<Result> resultList = multiResult.getResults();
-				for (Result result : resultList) {
-					log.debug("matchSuccessNotice" + result.toString());
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		sendGCM(player.getGcmToken(), json.toJSONString());
 	}
 	
 	public void noticeTurn(String regId) {
 		JSONObject json = new JSONObject();
-		
+		JSONObject move = new JSONObject();
 		json.put("type", "YOUR_TURN");
-		json.put("piece", "WP1");
-		json.put("tile", "D4");
+		move.put("srcPiece", "BP1");
+		move.put("destTile", "A6");
+		move.put("targetPiece", "null");
+		json.put("move", move);
+		json.put("check", false);
 		
 		log.debug("notice turn to " + regId);
 		
-		Message message = new Message.Builder().addData("data", json.toJSONString())
+		sendGCM(regId, json.toJSONString());
+	}
+	
+	public void surrenderNotice(long sessionKey, String loserId) {
+		JSONObject loserJson = new JSONObject();
+		JSONObject winnerJson = new JSONObject();
+		
+		winnerJson.put("type", "YOU_WIN");
+		winnerJson.put("state", "SURRENDER");
+		
+		loserJson.put("type", "YOU_LOSE");
+		loserJson.put("state", "SURRENDER");
+		
+		GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
+		Player[] players = gt.getUsers();
+		
+		Player winner = players[0].getId().equals(loserId) ? players[1] : players[0];
+		Player loser = players[0].getId().equals(loserId) ? players[0] : players[1];
+		
+		sendGCM(winner.getGcmToken(), winnerJson.toJSONString());
+		sendGCM(loser.getGcmToken(), loserJson.toJSONString());
+		
+		log.debug("surrender notice to " + sessionKey);
+	}
+	
+	public void sendGCM(String gcmToken, String data) {
+		Message message = new Message.Builder().addData("data", data)
 				.build();
 		List<String> list = new ArrayList<String>();
-		list.add(regId);
+		list.add(gcmToken);
 		MulticastResult multiResult;
 		try {
 			multiResult = sender.send(message, list, 5);

@@ -2,28 +2,30 @@ package chess_server.common.core;
 
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 
 public class GameThread implements Runnable {
 	private static final long MINUTE = 1000 * 60;
 	private static final long SECOND = 1000;
 	
-	private static final long GAME_COUNT = 3 * MINUTE;
+	private static final long GAME_COUNT = 60 * MINUTE;
 	
-	Logger log = Logger.getLogger(this.getClass());
+	private Logger log = Logger.getLogger(this.getClass());
 	
 	enum Turn {white, black};
 	
-	GCMSender sender;
-	ChessTimer cTimer;
+	private GCMSender sender;
+	private ChessTimer cTimer;
 	
-	Thread thread;
-	Player whitePlayer;
-	Player blackPlayer;
-	Algorithm chessBoard;
-	Turn turn;
-	boolean gameFlag = true; // 게임 종료 또는 항복시 false
-	boolean moveFlag = true; // move시 false
-	boolean selectFlag = true; // select시 false
+	private Thread thread;
+	private Player whitePlayer;
+	private Player blackPlayer;
+	private Algorithm chessBoard;
+	private Turn turn;
+	private boolean gameFlag = true; // 게임 종료 또는 항복시 false
+	private boolean moveFlag = true; // move시 false
+	private boolean selectFlag = true; // select시 false
+	private boolean turnOverFlag = false;
 	
 	public GameThread(Player whitePlayer, Player blackPlayer) {
 		this.whitePlayer = whitePlayer;
@@ -41,13 +43,21 @@ public class GameThread implements Runnable {
 				game();
 				cTimer.reCount();
 			} catch (InterruptedException e) {
-				info("Time out!!! " + ((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "LOSE");
-				info("END SESSION");
-				//sender.sendTest(((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken()), "TIMEOUT");
-				//sender.sendTest((!(turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken()), "OPPONENT TIMEOUT");
-				break;
-			} 
+				if (turnOverFlag) {
+					((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.WAIT);
+					turnOverFlag = false;
+				}
+				else {
+					info("Time out!!! " + ((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "LOSE");
+					info("END SESSION");
+					//sender.sendTest(((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken()), "TIMEOUT");
+					//sender.sendTest((!(turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken()), "OPPONENT TIMEOUT");
+					break;
+				}
+			}
 		}
+		
+		GameCoreManager.getInstance().closeSession(getSessionKey());
 	}
 	
 	private void game() throws InterruptedException {
@@ -58,16 +68,20 @@ public class GameThread implements Runnable {
 			turn = (turn == Turn.black) ? Turn.white : Turn.black;
 		}
 		// TODO: gcm으로 턴을 알려줌
+		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.SELECT);
 		info(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
+		info((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 	
 		waitNextWithFlag(selectFlag);
 		// User selected tile.
 		log.debug("USER SELECTED. THREAD AWAKE");
 		
+		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.MOVE);
 		waitNextWithFlag(moveFlag);
 		// User moved.
 		log.debug("USER MOVED. THREAD AWAKE");
+		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.WAIT);
 	}
 	
 	public void startGame() {
@@ -76,7 +90,7 @@ public class GameThread implements Runnable {
 		thread.start();
 	}
 	
-	public long getThreadId() {
+	public long getSessionKey() {
 		return thread.getId();
 	}
 	
@@ -86,6 +100,10 @@ public class GameThread implements Runnable {
 	
 	public Player[] getUsers() {
 		return new Player[]{whitePlayer, blackPlayer};
+	}
+	
+	public String getTurn() {
+		return turn.toString();
 	}
 	
 	private void waitNext() throws InterruptedException {
@@ -159,7 +177,10 @@ public class GameThread implements Runnable {
 	 *     "error" : error_code }
 	 */
 	public String userSurrender(Player player) {
-		return chessBoard.surrender(player).toJSONString();
+		//return chessBoard.surrender(player).toJSONString();
+		JSONObject json = new JSONObject();
+		json.put("type", "SURRENDER_ACCEPT");
+		return json.toJSONString();
 	}
 	
 	private void awakeThread(boolean flag) {
@@ -175,10 +196,15 @@ public class GameThread implements Runnable {
 	}
 	
 	private void info(String message) {
-		log.info(String.format("[%d] %s", getThreadId(), message));
+		log.info(String.format("[%d] %s", getSessionKey(), message));
 	}
 	
 	public void endGame() {
+		thread.interrupt();
+	}
+	
+	public void turnOver() {
+		turnOverFlag = true;
 		thread.interrupt();
 	}
 } 

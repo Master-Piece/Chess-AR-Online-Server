@@ -4,10 +4,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class Player {
+	enum Phase {SELECT, MOVE, WAIT};
+	
 	private String gcmToken;
 	private String nickName;
 	private String id;
 	private String color;
+	private Phase phase;
 	
 	public static final String WHITE = "white";
 	public static final String BLACK = "black";
@@ -15,12 +18,16 @@ public class Player {
 	public Player(String gcmToken, String nickName) {
 		this.gcmToken = gcmToken;
 		this.nickName = nickName;
-		
+		this.phase = Phase.WAIT;
 		this.id = getMD5(gcmToken + ":" + nickName);
 	}
 	
 	public void setColor(String color) {
 		this.color = color;
+	}
+	
+	public void setPhase(Phase phase) {
+		this.phase = phase;
 	}
 	
 	public String getColor() {
@@ -37,6 +44,10 @@ public class Player {
 	
 	public String getId() {
 		return id;
+	}
+	
+	public String getPhase() {
+		return phase.toString();
 	}
 	
 	public void setNickName(String nickName) {
