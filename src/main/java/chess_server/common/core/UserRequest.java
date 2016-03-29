@@ -7,7 +7,7 @@ public interface UserRequest {
 	public JSONObject select(Player player, String tile);
 	public JSONObject surrender(Player player);
 	public boolean isEnd();
-	
+	public boolean isCheckmate();
 	// return black or white
 	public String whoWin();
 }
