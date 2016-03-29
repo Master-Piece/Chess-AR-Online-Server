@@ -1,24 +1,46 @@
 package chess_server.common.core;
 
 import org.json.simple.JSONArray;
+
 import org.json.simple.JSONObject;
 
+
+
 public class Algorithm implements UserRequest {
-	private String[][] board ={
-			{"WR1","WN1","WB1","WQ","WK","WB2","WN2","WR2"},
-			{"WP1","WP2","WP3","WP4","WP5","WP6","WP7","WP8"},
-			{},
-			{},
-			{},
-			{},
-			{"BP8","BP7","BP6","BP5","BP4","BP3","BP2","BP1"},
-			{"BR2","BN2","BB2","BQ","BK","BB1","BN1","BR1"}};
+	class Piece{
+		char unit;
+		String name;
+		boolean isFirstMove;
+		boolean enPassant;
+		boolean pawnTwoMoved;
+		char color;
+		
+		Piece(String name){
+			this.name = name;
+			this.unit = name.charAt(1);
+			isFirstMove = true;
+			enPassant = false;
+			color = name.charAt(0);
+			pawnTwoMoved = false;
+		}
+	}
 	
-	private String getUnit(int x, int y){
+	private Piece[][] board = {
+			{new Piece("WR1"),new Piece("WN1"),new Piece("WB1"),new Piece("WQ"),new Piece("WK"),new Piece("WB2"),new Piece("WN2"),new Piece("WR2")},
+			{new Piece("WP1"),new Piece("WP2"),new Piece("WP3"),new Piece("WP4"),new Piece("WP5"),new Piece("WP6"),new Piece("WP7"),new Piece("WP8")},
+			{},
+			{},
+			{},
+			{},
+			{new Piece("BP8"),new Piece("BP7"),new Piece("BP6"),new Piece("BP5"),new Piece("BP4"),new Piece("BP3"),new Piece("BP2"),new Piece("BP1")},
+			{new Piece("BR2"),new Piece("BN2"),new Piece("BB2"),new Piece("BQ"),new Piece("BK"),new Piece("BB1"),new Piece("BN1"),new Piece("BR1")}};
+
+	
+	private Piece getPiece(int x, int y){
 		return board[x][y];
 	}
 	
-	private String getUnit(String tile){
+	private Piece getPiece(String tile){
 		int x[]= getPosition(tile);
 		return board[x[0]][x[1]];
 	}
@@ -42,32 +64,33 @@ public class Algorithm implements UserRequest {
 		return tile;
 	}
 	
-	
 	private JSONArray getKingMove(int x,int y){
 		JSONArray moves = new JSONArray();
-		char color = getUnit(x,y).charAt(0);
+		char color = getPiece(x,y).color;
 		int dx[] = {1, 1, 0, -1, -1, -1, 0, 1};
 		int dy[] = {0, 1, 1, 1, 0, -1, -1, -1};
 		
 		int i, nx, ny;
-		String unit;
+		Piece unit;
 		
 		for(i=0;i<8;i++){
 			nx = x + dx[i];
 			ny = y + dy[i];
 			
 			if(!isInRange(nx,ny)) continue;
-			unit = getUnit(nx,ny);
+			unit = getPiece(nx,ny);
 			
-			if(unit.isEmpty()){
+			if(unit == null){
 				moves.add(getTile(nx,ny));
 			}
 			else{
 				// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-				if(getUnit(nx,ny).charAt(0) == color) continue; //같은 플레이어의 말, 넘김
+				if(unit.color == color) continue; //같은 플레이어의 말, 넘김
 				moves.add(getTile(nx,ny)); 
 			}
 		}
+		
+		//캐슬링 체크하기 
 		return moves;
 	}
 	
@@ -76,8 +99,9 @@ public class Algorithm implements UserRequest {
 		int i,j, nx, ny;
 		int dx[] = {1, 1, 0, -1, -1, -1, 0, 1};
 		int dy[] = {0, 1, 1, 1, 0, -1, -1, -1};
-		String unit;
-		char color = getUnit(x,y).charAt(0);
+		Piece unit = getPiece(x,y), target;
+		
+		char color = unit.color;
 		
 		
 		for(i=0;i<8;i++){ //방향
@@ -86,14 +110,14 @@ public class Algorithm implements UserRequest {
 				ny = y + dy[i]*j;
 				
 				if(!isInRange(nx,ny)) break; //보드 범위 밖이므로 더이상 체크 하지 않는다
-				unit = getUnit(nx,ny);
+				target = getPiece(nx,ny);
 				
-				if(unit.isEmpty()){
+				if(target == null){
 					moves.add(getTile(nx,ny));
 				}
 				else{
 					// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-					if(getUnit(nx,ny).charAt(0) != color) moves.add(getTile(nx,ny)); 
+					if(target.color != color) moves.add(getTile(nx,ny)); 
 					break;
 				}
 			}
@@ -107,8 +131,8 @@ public class Algorithm implements UserRequest {
 		int dx[] = {1,-1,-1,1};
 		int dy[] = {1,1,-1,-1};
 		int i,j,nx,ny;
-		String unit;
-		char color = getUnit(x,y).charAt(0);
+		Piece unit = getPiece(x,y), target;
+		char color = unit.color;
 		
 		
 		for(i=0;i<4;i++){  //방향
@@ -116,17 +140,16 @@ public class Algorithm implements UserRequest {
 				nx = x + dx[i]*j;
 				ny = y + dy[i]*j;
 				if(!isInRange(nx,ny)) break;
-				unit = getUnit(nx,ny);
+				target = getPiece(nx,ny);
 				
-				if(unit.isEmpty()){
+				if(target == null){
 					moves.add(getTile(nx,ny));
 				}
 				else{
 					// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-					if(getUnit(nx,ny).charAt(0) != color) moves.add(getTile(nx,ny)); 
+					if(target.color != color) moves.add(getTile(nx,ny)); 
 					break;
 				}
-				
 			}
 		}
 		return moves;
@@ -137,8 +160,8 @@ public class Algorithm implements UserRequest {
 		int dx[] = {1,0,-1,0};
 		int dy[] = {0,1,0,-1};
 		int i,j,nx,ny;
-		String unit;
-		char color = getUnit(x,y).charAt(0);
+		Piece unit = getPiece(x,y), target;
+		char color = unit.color;
 		
 		
 		for(i=0;i<4;i++){  //방향
@@ -146,14 +169,14 @@ public class Algorithm implements UserRequest {
 				nx = x + dx[i]*j;
 				ny = y + dy[i]*j;
 				if(!isInRange(nx,ny)) break;
-				unit = getUnit(nx,ny);
+				target = getPiece(nx,ny);
 				
-				if(unit.isEmpty()){
+				if(target == null){
 					moves.add(getTile(nx,ny));
 				}
 				else{
 					// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-					if(getUnit(nx,ny).charAt(0) != color) moves.add(getTile(nx,ny)); 
+					if(target.color != color) moves.add(getTile(nx,ny)); 
 					break;
 				}
 				
@@ -167,21 +190,21 @@ public class Algorithm implements UserRequest {
 		int dx[] = {2, 1, -1, -2, -2, -1, 1, 2};
 		int dy[] = {1, 2, 2, 1, -1, -2, -2, -1};
 		int i,j,nx,ny;
-		String unit;
-		char color = getUnit(x,y).charAt(0);
+		Piece unit = getPiece(x,y), target;
+		char color = unit.color;
 			
 		for(i=0;i<8;i++){  //방향
 			nx = x + dx[i];
 			ny = y + dy[i];
 			if(!isInRange(nx,ny)) continue;
-			unit = getUnit(nx,ny);
+			target = getPiece(nx,ny);
 			
-			if(unit.isEmpty()){
+			if(target == null){
 				moves.add(getTile(nx,ny));
 			}
 			else{
 				// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-				if(getUnit(nx,ny).charAt(0) != color) moves.add(getTile(nx,ny)); 
+				if(target.color != color) moves.add(getTile(nx,ny)); 
 			}
 		}
 		return moves;
@@ -190,13 +213,13 @@ public class Algorithm implements UserRequest {
 	private JSONArray getPawnMove(int x,int y){
 		/*2칸 전진, 대각선에 적 기물 잡기, 1칸 전진*/
 		JSONArray moves = new JSONArray();
-		String unit = getUnit(x,y);
-		String oneFrontUnit = "", twoFrontUnit = "", crossUnit;
-		char color = unit.charAt(0);
+		Piece unit = getPiece(x,y);
+		Piece oneFrontUnit = null, twoFrontUnit = null, crossUnit;
+		char color = unit.color;
 		if(color == 'W'){
 			//전진 체크
-			if(isInRange(x+1,y)) oneFrontUnit = getUnit(x+1,y);
-			if(oneFrontUnit.isEmpty()){
+			if(isInRange(x+1,y)) oneFrontUnit = getPiece(x+1,y);
+			if(oneFrontUnit == null){
 				moves.add(getTile(x+1,y));
 				if(x == 1){ //2칸 전진 가능
 					twoFrontUnit = getUnit(x+2,y);
@@ -234,9 +257,7 @@ public class Algorithm implements UserRequest {
 		}
 		return moves;
 	}
-	
-	
-	
+		
 	private JSONArray getMovable(String tile){
 		JSONArray moves = new JSONArray();
 		
@@ -267,25 +288,6 @@ public class Algorithm implements UserRequest {
 		return moves;
 	}
 	
-	
-	public JSONObject move(Player player, String srcTile, String destTile) {
-		JSONObject message = new JSONObject();
-		
-		char color = player.getColor().charAt(0);
-		color = Character.toUpperCase(color);
-		int src_position[] = getPosition(srcTile); 
-		String src_unit = getUnit(srcTile);
-		
-		String dest_unit = getUnit(destTile);
-		int dest_position[] = getPosition(destTile);
-		
-		message.put("type", "MOVE_SUCCESS");
-		message.put("srcPiece",src_unit);
-		message.put("destTile", destTile);
-		message.put("targetPiece", dest_unit);
-		return message;
-	}
-	
 	@Override
 	public JSONObject select(Player player, String tile) {
 		JSONObject message = new JSONObject();
@@ -312,6 +314,32 @@ public class Algorithm implements UserRequest {
 		return message;
 	}
 
+	
+	public JSONObject move(Player player, String srcTile, String destTile) {
+		JSONObject message = new JSONObject();
+		
+		char color = player.getColor().charAt(0);
+		color = Character.toUpperCase(color);
+		int src_position[] = getPosition(srcTile); 
+		String src_unit = getUnit(srcTile);
+		
+		int dest_position[] = getPosition(destTile);
+		String dest_unit = getUnit(destTile);		
+		if(dest_unit.isEmpty()) dest_unit = null;
+		
+		board[src_position[0]][src_position[1]] = "";
+		board[dest_position[0]][dest_position[1]] = src_unit;
+		
+		message.put("type", "MOVE_SUCCESS");
+		message.put("state", )
+		message.put("srcPiece",src_unit);
+		message.put("destTile", destTile);
+		message.put("targetPiece", dest_unit);
+		return message;
+	}	
+	
+	
+
 	@Override
 	public JSONObject surrender(Player player) {
 		// TODO Auto-generated method stub
@@ -319,15 +347,20 @@ public class Algorithm implements UserRequest {
 	}
 
 	@Override
-	public boolean isEnd() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public String whoWin() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public boolean isCheckmate(){
+		
+		return false;
+	}
+	
+	@Override
+	public boolean isCheck(){
+		return false;
 	}
 
 }
