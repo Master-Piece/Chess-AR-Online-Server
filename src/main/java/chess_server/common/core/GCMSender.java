@@ -60,7 +60,7 @@ public class GCMSender {
 		
 		log.debug("notice turn to " + regId);
 		
-		sendGCM("Notice Turn", regId, json.toJSONString());
+		sendGCM(regId, json.toJSONString());
 	}
 	
 	public void surrenderNotice(long sessionKey, String loserId) {
@@ -98,7 +98,7 @@ public class GCMSender {
 			if (multiResult != null) {
 				List<Result> resultList = multiResult.getResults();
 				for (Result result : resultList) {
-					log.debug(stackTrace[0].getMethodName() + ": " + result.toString());
+					log.debug(stackTrace[1].getMethodName() + ": " + result.toString());
 				}
 			}
 		} catch (IOException e) {

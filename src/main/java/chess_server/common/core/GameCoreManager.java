@@ -1,5 +1,6 @@
 package chess_server.common.core;
 
+import java.lang.Thread.State;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,13 +27,13 @@ public class GameCoreManager {
 	
 	public long startGame(Player player_1, Player player_2) {
 		GameThread gt = new GameThread(player_1, player_2);
-		gt.startGame();
+		gt.createGame();
 		gameThreadPool.put(gt.getSessionKey(), gt);
 		
 		GCMSender sender = GCMSender.getInstance();
 		sender.matchSuccessNotice(player_1, gt.getSessionKey());
 		sender.matchSuccessNotice(player_2, gt.getSessionKey());
-		
+		gt.startGame();
 		log.debug("Match Success(" + gt.getSessionKey() + "): " + player_1.getNickName() + " VS "+ player_2.getNickName());
 		
 		return gt.getSessionKey();

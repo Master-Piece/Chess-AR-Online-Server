@@ -36,7 +36,13 @@ public class GameThread implements Runnable {
 	
 	@Override
 	public void run() {
-		
+		info("game created");
+		try {
+			waitNext();
+		} catch (InterruptedException e) {
+			log.debug("start error");
+		}
+		info("game started.");
 		while (gameFlag) {
 			try {
 				cTimer.startCount(GAME_COUNT);
@@ -83,7 +89,7 @@ public class GameThread implements Runnable {
 		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.WAIT);
 	}
 	
-	public void startGame() {
+	public void createGame() {
 		thread = new Thread(this);
 		cTimer = new ChessTimer(thread); 
 		thread.start();
@@ -106,15 +112,9 @@ public class GameThread implements Runnable {
 	}
 	
 	private void waitNext() throws InterruptedException {
-//		try {
-			synchronized(thread) {
-				thread.wait();
-			}
-//		} catch (InterruptedException ie) {
-//			throw new InterruptedException();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} 
+		synchronized(thread) {
+			thread.wait();
+		}
 	}
 	
 	private void waitNextWithFlag(boolean flag) throws InterruptedException {
@@ -211,5 +211,11 @@ public class GameThread implements Runnable {
 	public void turnOver() {
 		turnOverFlag = true;
 		thread.interrupt();
+	}
+	
+	public void startGame() {
+		synchronized(thread) {
+			thread.notify();
+		}
 	}
 } 
