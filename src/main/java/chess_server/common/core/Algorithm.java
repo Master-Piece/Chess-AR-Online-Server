@@ -345,8 +345,8 @@ public class Algorithm implements UserRequest {
 		move.put("srcPiece",src_unit.name);
 		move.put("destTile",destTile);
 		message.put("move",move);
-		rookMove.put("srcPiece", value);
-		rookMove.put("destTile", value);
+		//rookMove.put("srcPiece", value);
+		//rookMove.put("destTile", value);
 		message.put("rookMove", rookMove);
 		return message;
 	}	
