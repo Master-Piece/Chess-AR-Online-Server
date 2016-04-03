@@ -46,7 +46,7 @@ public class Algorithm implements UserRequest {
 	}
 	
 	private int[] getPosition(String tile){
-		int x[] = {tile.charAt(1) - '1' , tile.charAt(0) - 'a'};
+		int x[] = {tile.charAt(1) - '1' , tile.charAt(0) - 'A'};
 		return x;
 	}
 	
