@@ -143,7 +143,10 @@ public class GameThread implements Runnable {
 			awakeThread(selectFlag);
 			thread.notify();
 		}
-		return chessBoard.select(player, tile).toJSONString();
+		JSONObject json = chessBoard.select(player, tile);
+		json.put("sessionKey", getSessionKey());
+		json.put("userId", player.getId());
+		return json.toJSONString();
 	}
 	
 	/*  GameCoreController에서 호출. 유저가 체스말을 움직이면 실행될 메서드.
@@ -163,7 +166,10 @@ public class GameThread implements Runnable {
 			awakeThread(moveFlag);
 			thread.notify();
 		}
-		return chessBoard.move(player, srcTile, destTile).toJSONString();
+		JSONObject json = chessBoard.move(player, srcTile, destTile);
+		json.put("sessionKey", getSessionKey());
+		json.put("userId", player.getId());
+		return json.toJSONString();
 	}
 	
 	/*  GameCoreController에서 호출. 유저가 자신의 턴에 항복 선언
