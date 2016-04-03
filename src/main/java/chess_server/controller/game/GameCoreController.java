@@ -35,15 +35,15 @@ public class GameCoreController {
 			if (!type.equals("COMMAND"))
 				return mv;
 			
-//			if (value.equals("select"))
-//				return getTiles(commandMap);
-//			else if (value.equals("move"))
-//				return move(commandMap);
-//			else if (value.equals("surrender"))
-//				return surrender(commandMap);
-//			else
-//				return mv;
-			return test(commandMap, value);
+			if (value.equals("select"))
+				return getTiles(commandMap);
+			else if (value.equals("move"))
+				return move(commandMap);
+			else if (value.equals("surrender"))
+				return surrender(commandMap);
+			else
+				return mv;
+//			return test(commandMap, value);
 		}
 		
 		return mv;

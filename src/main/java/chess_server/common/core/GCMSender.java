@@ -86,6 +86,8 @@ public class GCMSender {
 	}
 	
 	public void sendGCM(String gcmToken, String data) {
+		StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+		
 		Message message = new Message.Builder().addData("data", data)
 				.build();
 		List<String> list = new ArrayList<String>();
@@ -96,7 +98,27 @@ public class GCMSender {
 			if (multiResult != null) {
 				List<Result> resultList = multiResult.getResults();
 				for (Result result : resultList) {
-					log.debug("noticeTurn: " + result.toString());
+					log.debug(stackTrace[1].getMethodName() + ": " + result.toString());
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendGCM(String tag, String gcmToken, String data) {
+		Message message = new Message.Builder().addData("data", data)
+				.build();
+		List<String> list = new ArrayList<String>();
+		list.add(gcmToken);
+		MulticastResult multiResult;
+		try {
+			multiResult = sender.send(message, list, 5);
+			if (multiResult != null) {
+				List<Result> resultList = multiResult.getResults();
+				for (Result result : resultList) {
+					log.debug(tag + ": " + result.toString());
 				}
 			}
 		} catch (IOException e) {

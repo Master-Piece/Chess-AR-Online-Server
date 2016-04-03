@@ -36,7 +36,13 @@ public class GameThread implements Runnable {
 	
 	@Override
 	public void run() {
-		
+		info("game created");
+		try {
+			waitNext();
+		} catch (InterruptedException e) {
+			log.debug("start error");
+		}
+		info("game started.");
 		while (gameFlag) {
 			try {
 				cTimer.startCount(GAME_COUNT);
@@ -70,7 +76,6 @@ public class GameThread implements Runnable {
 		// TODO: gcm으로 턴을 알려줌
 		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.SELECT);
 		info(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
-		info((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 	
 		waitNextWithFlag(selectFlag);
@@ -84,7 +89,7 @@ public class GameThread implements Runnable {
 		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.WAIT);
 	}
 	
-	public void startGame() {
+	public void createGame() {
 		thread = new Thread(this);
 		cTimer = new ChessTimer(thread); 
 		thread.start();
@@ -107,15 +112,9 @@ public class GameThread implements Runnable {
 	}
 	
 	private void waitNext() throws InterruptedException {
-//		try {
-			synchronized(thread) {
-				thread.wait();
-			}
-//		} catch (InterruptedException ie) {
-//			throw new InterruptedException();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} 
+		synchronized(thread) {
+			thread.wait();
+		}
 	}
 	
 	private void waitNextWithFlag(boolean flag) throws InterruptedException {
@@ -143,7 +142,10 @@ public class GameThread implements Runnable {
 			awakeThread(selectFlag);
 			thread.notify();
 		}
-		return chessBoard.select(player, tile).toJSONString();
+		JSONObject json = chessBoard.select(player, tile);
+		json.put("sessionKey", getSessionKey());
+		json.put("userId", player.getId());
+		return json.toJSONString();
 	}
 	
 	/*  GameCoreController에서 호출. 유저가 체스말을 움직이면 실행될 메서드.
@@ -163,7 +165,10 @@ public class GameThread implements Runnable {
 			awakeThread(moveFlag);
 			thread.notify();
 		}
-		return chessBoard.move(player, srcTile, destTile).toJSONString();
+		JSONObject json = chessBoard.move(player, srcTile, destTile);
+		json.put("sessionKey", getSessionKey());
+		json.put("userId", player.getId());
+		return json.toJSONString();
 	}
 	
 	/*  GameCoreController에서 호출. 유저가 자신의 턴에 항복 선언
@@ -206,5 +211,11 @@ public class GameThread implements Runnable {
 	public void turnOver() {
 		turnOverFlag = true;
 		thread.interrupt();
+	}
+	
+	public void startGame() {
+		synchronized(thread) {
+			thread.notify();
+		}
 	}
 } 
