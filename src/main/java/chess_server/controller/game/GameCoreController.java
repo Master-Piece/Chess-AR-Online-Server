@@ -89,7 +89,7 @@ public class GameCoreController {
 			
 			GameThread gt = gcm.getGame(sessionKey);
 			String json = gt.availableTiles(tile, gt.getPlayerById(userId));
-			
+			log.info("select\n" + json);
 			mv.addObject("json", json);
 		}
 		
@@ -119,6 +119,7 @@ public class GameCoreController {
 			GameThread gt = gcm.getGame(sessionKey);
 			
 			String json = gt.userMoveTile(gt.getPlayerById(userId), srcTile, destTile);
+			log.info("move\n" + json);
 			mv.addObject("json", json);
 		}
 		
