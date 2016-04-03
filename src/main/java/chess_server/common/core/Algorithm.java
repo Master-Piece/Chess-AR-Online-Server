@@ -221,38 +221,38 @@ public class Algorithm implements UserRequest {
 			if(isInRange(x+1,y)) oneFrontUnit = getPiece(x+1,y);
 			if(oneFrontUnit == null){
 				moves.add(getTile(x+1,y));
-				if(x == 1){ //2칸 전진 가능
-					twoFrontUnit = getUnit(x+2,y);
-					if(twoFrontUnit.isEmpty()) moves.add(getTile(x+2,y));
+				if(!unit.pawnTwoMoved){ //2칸 전진 가능
+					twoFrontUnit = getPiece(x+2,y);
+					if(twoFrontUnit == null) moves.add(getTile(x+2,y));
 				}
 			}
 			//대각체크
 			if(isInRange(x+1,y-1)){
-				crossUnit = getUnit(x+1,y-1);
-				if(color != crossUnit.charAt(0)) moves.add(getTile(x+1,y-1));
+				crossUnit = getPiece(x+1,y-1);
+				if(color != crossUnit.color) moves.add(getTile(x+1,y-1));
 			}
 			if(isInRange(x+1,y+1)){
-				crossUnit = getUnit(x+1,y+1);
-				if(color != crossUnit.charAt(0)) moves.add(getTile(x+1,y+1));			
+				crossUnit = getPiece(x+1,y+1);
+				if(color != crossUnit.color) moves.add(getTile(x+1,y+1));			
 			}			
 		}
 		else{
-			if(isInRange(x-1,y)) oneFrontUnit = getUnit(x-1,y);
-			if(oneFrontUnit.isEmpty()){
+			if(isInRange(x-1,y)) oneFrontUnit = getPiece(x-1,y);
+			if(oneFrontUnit == null){
 				moves.add(getTile(x-1,y));
-				if(x == 6){ //2칸 전진 가능
-					twoFrontUnit = getUnit(x-2,y);
-					if(twoFrontUnit.isEmpty()) moves.add(getTile(x-2,y));
+				if(!unit.pawnTwoMoved){ //2칸 전진 가능
+					twoFrontUnit = getPiece(x-2,y);
+					if(twoFrontUnit==null) moves.add(getTile(x-2,y));
 				}
 			}
 			//대각체크
 			if(isInRange(x-1,y-1)){
-				crossUnit = getUnit(x-1,y-1);
-				if(color != crossUnit.charAt(0)) moves.add(getTile(x-1,y-1));
+				crossUnit = getPiece(x-1,y-1);
+				if(color != crossUnit.color) moves.add(getTile(x-1,y-1));
 			}
 			if(isInRange(x-1,y+1)){
-				crossUnit = getUnit(x-1,y+1);
-				if(color != crossUnit.charAt(0)) moves.add(getTile(x-1,y+1));		
+				crossUnit = getPiece(x-1,y+1);
+				if(color != crossUnit.color) moves.add(getTile(x-1,y+1));		
 			}	
 		}
 		return moves;
@@ -264,9 +264,9 @@ public class Algorithm implements UserRequest {
 		int position[] = getPosition(tile);
 		int x = position[0];
 		int y = position[1];
-		String unit = getUnit(tile);
+		Piece unit = getPiece(tile);
 		
-		char c = unit.charAt(1);
+		char c = unit.unit;
 		if(c ==  'K'){
 			moves = getKingMove(x,y);
 		}
@@ -291,11 +291,11 @@ public class Algorithm implements UserRequest {
 	@Override
 	public JSONObject select(Player player, String tile) {
 		JSONObject message = new JSONObject();
-		String unit = getUnit(tile);
+		Piece unit = getPiece(tile);
 		char color = player.getColor().charAt(0);
 		color = Character.toUpperCase(color);
 		
-		if( color == unit.charAt(0)){
+		if( color == unit.color){
 			//이동가능한 타일들 모아서 보내줌
 			JSONArray moves = getMovable(tile);
 			
@@ -317,24 +317,37 @@ public class Algorithm implements UserRequest {
 	
 	public JSONObject move(Player player, String srcTile, String destTile) {
 		JSONObject message = new JSONObject();
-		
+		JSONObject move = new JSONObject(), rookMove = new JSONObject();
+		String castling = "NONE";
 		char color = player.getColor().charAt(0);
 		color = Character.toUpperCase(color);
 		int src_position[] = getPosition(srcTile); 
-		String src_unit = getUnit(srcTile);
+		Piece src_unit = getPiece(srcTile);
 		
 		int dest_position[] = getPosition(destTile);
-		String dest_unit = getUnit(destTile);		
-		if(dest_unit.isEmpty()) dest_unit = null;
+		Piece dest_unit = getPiece(destTile);	
 		
-		board[src_position[0]][src_position[1]] = "";
+		board[src_position[0]][src_position[1]] = null;
 		board[dest_position[0]][dest_position[1]] = src_unit;
 		
+		if(src_unit.unit == 'P'){
+			if(Math.abs(src_position[0] - dest_position[0]) == 2)src_unit.pawnTwoMoved = true;
+		}
+		else if(src_unit.unit == 'K'){
+			/*if(){
+				castling = "CASTLING";
+			}*/
+		}
+		
+		
 		message.put("type", "MOVE_SUCCESS");
-		message.put("state", )
-		message.put("srcPiece",src_unit);
-		message.put("destTile", destTile);
-		message.put("targetPiece", dest_unit);
+		message.put("state", castling);
+		move.put("srcPiece",src_unit.name);
+		move.put("destTile",destTile);
+		message.put("move",move);
+		rookMove.put("srcPiece", value);
+		rookMove.put("destTile", value);
+		message.put("rookMove", rookMove);
 		return message;
 	}	
 	
