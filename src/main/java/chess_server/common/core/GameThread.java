@@ -70,7 +70,6 @@ public class GameThread implements Runnable {
 		// TODO: gcm으로 턴을 알려줌
 		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.SELECT);
 		info(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
-		info((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
 	
 		waitNextWithFlag(selectFlag);
