@@ -300,7 +300,7 @@ public class Algorithm implements UserRequest {
 			JSONArray moves = getMovable(tile);
 			
 			message.put("type", "SELECT_SUCCESS");
-			message.put("piece",  unit);
+			message.put("piece",  unit.name);
 			message.put("tiles", moves);
 			message.put("error", "");
 		}
