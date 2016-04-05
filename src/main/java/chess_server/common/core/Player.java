@@ -12,6 +12,8 @@ public class Player {
 	private String color;
 	private Phase phase;
 	
+	private String[] recentMove; // 0 : 움직인 말, 1 : 움직인 위치
+	
 	public static final String WHITE = "white";
 	public static final String BLACK = "black";
 	
@@ -20,6 +22,7 @@ public class Player {
 		this.nickName = nickName;
 		this.phase = Phase.WAIT;
 		this.id = getMD5(gcmToken + ":" + nickName);
+		recentMove = new String[2];
 	}
 	
 	public void setColor(String color) {
@@ -71,5 +74,29 @@ public class Player {
 			MD5 = null; 
 		}
 		return MD5;
+	}
+	
+	public String getRecentMoveObject() {
+		return recentMove[0];
+	}
+	
+	public String getRecentMoveDestnation() {
+		return recentMove[1];
+	}
+	
+	public String getRecentMoveTarget() {
+		return recentMove[2];
+	}
+	
+	public void setRecentMove(String object, String destination) {
+		recentMove[0] = object;
+		recentMove[1] = destination;
+		recentMove[2] = "null";
+	}
+	
+	public void setRecentMove(String object, String destination, String target) {
+		recentMove[0] = object;
+		recentMove[1] = destination;
+		recentMove[2] = target;
 	}
 }
