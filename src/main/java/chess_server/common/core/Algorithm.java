@@ -1,12 +1,11 @@
 package chess_server.common.core;
 
 import org.json.simple.JSONArray;
-
 import org.json.simple.JSONObject;
 
 
 
-public class Algorithm implements UserRequest {
+public class Algorithm {
 	class Piece{
 		char unit;
 		String name;
@@ -28,14 +27,23 @@ public class Algorithm implements UserRequest {
 	private Piece[][] board = {
 			{new Piece("WR1"),new Piece("WN1"),new Piece("WB1"),new Piece("WQ"),new Piece("WK"),new Piece("WB2"),new Piece("WN2"),new Piece("WR2")},
 			{new Piece("WP1"),new Piece("WP2"),new Piece("WP3"),new Piece("WP4"),new Piece("WP5"),new Piece("WP6"),new Piece("WP7"),new Piece("WP8")},
-			{},
-			{},
-			{},
-			{},
+			{null, null, null, null, null, null, null, null},
+			{null, null, null, null, null, null, null, null},
+			{null, null, null, null, null, null, null, null},
+			{null, null, null, null, null, null, null, null},
 			{new Piece("BP8"),new Piece("BP7"),new Piece("BP6"),new Piece("BP5"),new Piece("BP4"),new Piece("BP3"),new Piece("BP2"),new Piece("BP1")},
 			{new Piece("BR2"),new Piece("BN2"),new Piece("BB2"),new Piece("BQ"),new Piece("BK"),new Piece("BB1"),new Piece("BN1"),new Piece("BR1")}};
 
-	
+	public void print(){
+		int i,j;
+		for(i=0;i<8;i++){
+			for(j=0;j<8;j++){
+				if(board[i][j]!=null) System.out.print(board[i][j].name + " ");
+				else System.out.print("   ");
+			}
+			System.out.println();
+		}
+	}
 	private Piece getPiece(int x, int y){
 		return board[x][y];
 	}
@@ -57,7 +65,7 @@ public class Algorithm implements UserRequest {
 	
 	private String getTile(int x, int y){
 		String tile="";
-		char a = '1',b = 'a';
+		char a = '1',b = 'A';
 		a += x;
 		b += y;
 		tile = tile + b + a;
@@ -230,11 +238,11 @@ public class Algorithm implements UserRequest {
 			//대각체크
 			if(isInRange(x+1,y-1)){
 				crossUnit = getPiece(x+1,y-1);
-				if(color != crossUnit.color) moves.add(getTile(x+1,y-1));
+				if(crossUnit != null && color != crossUnit.color) moves.add(getTile(x+1,y-1));
 			}
 			if(isInRange(x+1,y+1)){
 				crossUnit = getPiece(x+1,y+1);
-				if(color != crossUnit.color) moves.add(getTile(x+1,y+1));			
+				if(crossUnit != null && color != crossUnit.color) moves.add(getTile(x+1,y+1));			
 			}			
 		}
 		else{
@@ -249,11 +257,11 @@ public class Algorithm implements UserRequest {
 			//대각체크
 			if(isInRange(x-1,y-1)){
 				crossUnit = getPiece(x-1,y-1);
-				if(color != crossUnit.color) moves.add(getTile(x-1,y-1));
+				if(crossUnit != null && color != crossUnit.color) moves.add(getTile(x-1,y-1));
 			}
 			if(isInRange(x-1,y+1)){
 				crossUnit = getPiece(x-1,y+1);
-				if(color != crossUnit.color) moves.add(getTile(x-1,y+1));		
+				if(crossUnit != null && color != crossUnit.color) moves.add(getTile(x-1,y+1));		
 			}	
 		}
 		return moves;
@@ -289,7 +297,7 @@ public class Algorithm implements UserRequest {
 		return moves;
 	}
 	
-	@Override
+	
 	public JSONObject select(Player player, String tile) {
 		JSONObject message = new JSONObject();
 		Piece unit = getPiece(tile);
@@ -382,19 +390,22 @@ public class Algorithm implements UserRequest {
 	
 	
 
-	@Override
 	public JSONObject surrender(Player player) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public String whoWin() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
-	@Override
+	
+	public boolean isCheckmate(){
+		return false;
+	}
+	
 	public boolean isCheckmate(char color){
 		int i,j;
 		JSONArray moves = null;
@@ -413,7 +424,11 @@ public class Algorithm implements UserRequest {
 		return false;
 	}
 	
-	@Override
+	
+	public boolean isCheck(){
+		return false;
+	}
+	
 	public boolean isCheck(char color){
 		int check[][] = new int[8][8];
 		int kingX, kingY, i, j;
