@@ -85,7 +85,7 @@ public class GameThread implements Runnable {
 		currentPlayer.setPhase(Player.Phase.SELECT);
 		info(currentPlayer.getColor() + "'s Turn");
 		sender.noticeTurn(currentPlayer.getGcmToken(), turnData);
-		if (chessBoard.isCheckmate('c')) {
+		if (chessBoard.isCheckmate(currentPlayer.getColor().toUpperCase().charAt(0))) {
 			gameFlag = false;
 			return;
 		}
@@ -131,8 +131,8 @@ public class GameThread implements Runnable {
 	}
 	
 	private void setTurnData() {
-		boolean checkFlag = chessBoard.isCheck('c');
-		boolean checkMateFlag = chessBoard.isCheckmate('c');
+		boolean checkFlag = chessBoard.isCheck(currentPlayer.getColor().toUpperCase().charAt(0));
+		boolean checkMateFlag = chessBoard.isCheckmate(currentPlayer.getColor().toUpperCase().charAt(0));
 		
 		turnData.clear();
 		
