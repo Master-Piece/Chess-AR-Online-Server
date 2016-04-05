@@ -105,6 +105,7 @@
 		var timer = null;
 		
 		$(document).ready(function() {
+			timer = setInterval(refresh, 5000);
 			$('.game').bind('click', gameHandler);
 			
 			$('#exitGame').bind('click', function() {
@@ -306,8 +307,8 @@
 		</ul>
 		<ul class="btns" id="refreshBtns">
 			<li>Refresh</li>
-			<li class="on"><button>On</button></li>
-			<li class="off"><button disabled>Off</button></li>
+			<li class="on"><button disabled>On</button></li>
+			<li class="off"><button>Off</button></li>
 		</ul>
 		<ul class="btns" id="mmBtns">
 			<li>MatchMaker</li>

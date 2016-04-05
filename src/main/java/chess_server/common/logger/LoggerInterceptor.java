@@ -19,6 +19,9 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
 	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+		if (request.getRequestURI().equals("/chess_server/manager/refreshAll.cao")) {
+			return super.preHandle(request, response, handler);
+		}
 		if (log.isDebugEnabled()) {
 			log.debug(START_TAG);
 			log.debug("\tRequest Host\t:\t" + request.getRemoteAddr());
@@ -37,6 +40,8 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
 
 	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+		if (request.getRequestURI().equals("/chess_server/manager/refreshAll.cao"))
+			return;
 		if (log.isDebugEnabled()) {
 			log.debug(END_TAG);
 		}

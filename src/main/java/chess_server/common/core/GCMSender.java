@@ -127,6 +127,8 @@ public class GCMSender {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		log.debug(data + "\n-------------------------------------------");
 	}
 	
 	public void sendGCM(String tag, String gcmToken, String data) {
