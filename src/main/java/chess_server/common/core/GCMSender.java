@@ -88,9 +88,13 @@ public class GCMSender {
 	public void winnerNotice(long sessionKey, String winnerId, String state) {
 		JSONObject winnerJSON = new JSONObject();
 		winnerJSON.put("type", "YOU_WIN");
-		winnerJSON.put("type", state);
+		winnerJSON.put("state", state);
 		
 		GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
+		log.debug("winnerId: " + winnerId);
+		if (gt == null) {
+			log.debug("gt is null");
+		}
 		Player winner = gt.getPlayerById(winnerId);
 		
 		sendGCM(winner.getGcmToken(), winnerJSON.toJSONString());

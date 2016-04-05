@@ -144,12 +144,14 @@ public class GameCoreController {
 			String userId = (String) arg.get("userId");
 			
 			GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
-			gt.userSurrender(gt.getPlayerById(userId));
+			String json = gt.userSurrender(gt.getPlayerById(userId));
 			
 			GCMSender sender = GCMSender.getInstance();
 			sender.surrenderNotice(sessionKey, userId);
 			
 			GameCoreManager.getInstance().closeSession(sessionKey);
+			
+			mv.addObject("json", json);
 		}
 		
 		return mv;
