@@ -60,7 +60,7 @@ public class GameCoreController {
 	        
 	        GameThread gt = gcm.getGame(Long.parseLong(sessionKey));
 	        
-	        Player[] users = gt.getUsers();
+	        Player[] users = gt.getPlayers();
 	        
 	        mv.addObject("users", String.format("%s(%s) VS %s(%s)", users[0].getNickName(), users[0].getId(), users[1].getNickName(), users[1].getId()));
 		}

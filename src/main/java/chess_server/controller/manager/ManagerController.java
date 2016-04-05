@@ -45,7 +45,7 @@ public class ManagerController {
 		long sessionKey = Long.parseLong((String) commandMap.getMap().get("sessionKey"));
 		
 		GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
-		Player[] users = gt.getUsers();
+		Player[] users = gt.getPlayers();
 		
 		JSONObject json = new JSONObject();
 		json.put("sessionKey", sessionKey);

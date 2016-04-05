@@ -20,7 +20,10 @@ public class GameThread implements Runnable {
 	private Thread thread;
 	private Player whitePlayer;
 	private Player blackPlayer;
+	private Player currentTurnPlayer;
+	
 	private Algorithm chessBoard;
+	private JSONObject turnData;
 	private Turn turn;
 	private boolean gameFlag = true; // 게임 종료 또는 항복시 false
 	private boolean moveFlag = true; // move시 false
@@ -32,6 +35,7 @@ public class GameThread implements Runnable {
 		this.blackPlayer = blackPlayer;
 		chessBoard = new Algorithm();
 		sender = GCMSender.getInstance();
+		turnData = new JSONObject();
 	}
 	
 	@Override
@@ -50,14 +54,13 @@ public class GameThread implements Runnable {
 				cTimer.reCount();
 			} catch (InterruptedException e) {
 				if (turnOverFlag) {
-					((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.WAIT);
+					currentTurnPlayer.setPhase(Player.Phase.WAIT);
 					turnOverFlag = false;
 				}
 				else {
-					info("Time out!!! " + ((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "LOSE");
+					info("Time out!!! " + currentTurnPlayer.getColor() + "LOSE");
 					info("END SESSION");
-					//sender.sendTest(((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken()), "TIMEOUT");
-					//sender.sendTest((!(turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken()), "OPPONENT TIMEOUT");
+					
 					break;
 				}
 			}
@@ -73,22 +76,56 @@ public class GameThread implements Runnable {
 		else {
 			turn = (turn == Turn.black) ? Turn.white : Turn.black;
 		}
+		currentTurnPlayer = (turn == Turn.black) ? blackPlayer : whitePlayer;
+		
 		// TODO: gcm으로 턴을 알려줌
-		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.SELECT);
-		info(((turn == Turn.black) ? blackPlayer.getColor() : whitePlayer.getColor()) + "'s Turn");
-		sender.noticeTurn((turn == Turn.black) ? blackPlayer.getGcmToken() : whitePlayer.getGcmToken());
-	
+		currentTurnPlayer.setPhase(Player.Phase.SELECT);
+		info(currentTurnPlayer.getColor() + "'s Turn");
+		sender.noticeTurn(currentTurnPlayer.getGcmToken(), turnData);
+		if (chessBoard.isCheckmate()) {
+			gameFlag = false;
+			return;
+		}
 		waitNextWithFlag(selectFlag);
 		// User selected tile.
 		log.debug("USER SELECTED. THREAD AWAKE");
 		
-		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.MOVE);
+		currentTurnPlayer.setPhase(Player.Phase.MOVE);
 		waitNextWithFlag(moveFlag);
 		// User moved.
 		log.debug("USER MOVED. THREAD AWAKE");
-		((turn == Turn.black) ? blackPlayer : whitePlayer).setPhase(Player.Phase.WAIT);
+		currentTurnPlayer.setPhase(Player.Phase.WAIT);
+		
+		setTurnData();
 	}
 	
+	private void setTurnData() {
+		boolean checkFlag = chessBoard.isCheck();
+		boolean checkMateFlag = chessBoard.isCheckmate();
+		
+		turnData.clear();
+		
+		if (checkMateFlag) {
+			turnData.put("type", "YOU LOSE");
+			turnData.put("status", "CHECKMATE");
+			JSONObject move = new JSONObject();
+			move.put("srcPiece", currentTurnPlayer.getRecentMoveObject());
+			move.put("destTile", currentTurnPlayer.getRecentMoveDestnation());
+			move.put("targetPiece", currentTurnPlayer.getRecentMoveTarget());
+			turnData.put("move", move);
+			sender.winnerNotice(getSessionKey(), currentTurnPlayer.getGcmToken(), "CHECKMATE");
+		}
+		else {
+			turnData.put("type", "YOUR TURN");
+			JSONObject move = new JSONObject();
+			move.put("srcPiece", currentTurnPlayer.getRecentMoveObject());
+			move.put("destTile", currentTurnPlayer.getRecentMoveDestnation());
+			move.put("targetPiece", currentTurnPlayer.getRecentMoveTarget());
+			turnData.put("move", move);
+			turnData.put("check", checkFlag);
+		}
+	}
+
 	public void createGame() {
 		thread = new Thread(this);
 		cTimer = new ChessTimer(thread); 
@@ -103,7 +140,7 @@ public class GameThread implements Runnable {
 		return thread;
 	}
 	
-	public Player[] getUsers() {
+	public Player[] getPlayers() {
 		return new Player[]{whitePlayer, blackPlayer};
 	}
 	
@@ -168,6 +205,8 @@ public class GameThread implements Runnable {
 		JSONObject json = chessBoard.move(player, srcTile, destTile);
 		json.put("sessionKey", getSessionKey());
 		json.put("userId", player.getId());
+		JSONObject move = (JSONObject) json.get("move");
+		currentTurnPlayer.setRecentMove((String) move.get("srcPiece"), (String) move.get("destTile"));
 		return json.toJSONString();
 	}
 	

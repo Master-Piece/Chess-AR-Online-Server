@@ -48,19 +48,8 @@ public class GCMSender {
 		sendGCM(player.getGcmToken(), json.toJSONString());
 	}
 	
-	public void noticeTurn(String regId) {
-		JSONObject json = new JSONObject();
-		JSONObject move = new JSONObject();
-		json.put("type", "YOUR_TURN");
-		move.put("srcPiece", "BP1");
-		move.put("destTile", "A6");
-		move.put("targetPiece", "null");
-		json.put("move", move);
-		json.put("check", false);
-		
-		log.debug("notice turn to " + regId);
-		
-		sendGCM(regId, json.toJSONString());
+	public void noticeTurn(String regId, JSONObject turnData) {
+		sendGCM(regId, turnData.toJSONString());
 	}
 	
 	public void surrenderNotice(long sessionKey, String loserId) {
@@ -74,15 +63,48 @@ public class GCMSender {
 		loserJson.put("state", "SURRENDER");
 		
 		GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
-		Player[] players = gt.getUsers();
+		Player[] players = gt.getPlayers();
 		
 		Player winner = players[0].getId().equals(loserId) ? players[1] : players[0];
 		Player loser = players[0].getId().equals(loserId) ? players[0] : players[1];
 		
-		sendGCM(winner.getGcmToken(), winnerJson.toJSONString());
+		winnerNotice(sessionKey, winner.getGcmToken(), "SURRENDER");
 		sendGCM(loser.getGcmToken(), loserJson.toJSONString());
 		
 		log.debug("surrender notice to " + sessionKey);
+	}
+	
+	public void timeoutNotice(long sessionKey, String loserId) {
+		GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
+		Player[] players = gt.getPlayers();
+		
+		Player winner = players[0].getId().equals(loserId) ? players[1] : players[0];
+		Player loser = players[0].getId().equals(loserId) ? players[0] : players[1];
+		
+		loserNotice(sessionKey, loserId, "TIMEOUT");
+		winnerNotice(sessionKey, winner.getId(), "TIMEOUT");
+	}
+	
+	public void winnerNotice(long sessionKey, String winnerId, String state) {
+		JSONObject winnerJSON = new JSONObject();
+		winnerJSON.put("type", "YOU_WIN");
+		winnerJSON.put("type", state);
+		
+		GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
+		Player winner = gt.getPlayerById(winnerId);
+		
+		sendGCM(winner.getGcmToken(), winnerJSON.toJSONString());
+	}
+	
+	public void loserNotice(long sessionKey, String loserId, String state) {
+		JSONObject loserJSON = new JSONObject();
+		loserJSON.put("type", "YOU_LOSE");
+		loserJSON.put("type", state);
+		
+		GameThread gt = GameCoreManager.getInstance().getGame(sessionKey);
+		Player loser = gt.getPlayerById(loserId);
+		
+		sendGCM(loser.getGcmToken(), loserJSON.toJSONString());
 	}
 	
 	public void sendGCM(String gcmToken, String data) {
