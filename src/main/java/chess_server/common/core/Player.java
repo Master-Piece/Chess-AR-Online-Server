@@ -22,7 +22,7 @@ public class Player {
 		this.nickName = nickName;
 		this.phase = Phase.WAIT;
 		this.id = getMD5(gcmToken + ":" + nickName);
-		recentMove = new String[2];
+		recentMove = new String[3];
 	}
 	
 	public void setColor(String color) {
