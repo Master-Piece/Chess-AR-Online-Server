@@ -91,6 +91,7 @@ public class Algorithm implements UserRequest {
 		}
 		
 		//캐슬링 체크하기 
+		
 		return moves;
 	}
 	
@@ -295,10 +296,11 @@ public class Algorithm implements UserRequest {
 		char color = player.getColor().charAt(0);
 		color = Character.toUpperCase(color);
 		
-		if( color == unit.color){
+		
+		
+		if(unit != null && color == unit.color){
 			//이동가능한 타일들 모아서 보내줌
-			JSONArray moves = getMovable(tile);
-			
+			JSONArray moves = getMovable(tile);	
 			message.put("type", "SELECT_SUCCESS");
 			message.put("piece",  unit.name);
 			message.put("tiles", moves);
@@ -319,6 +321,7 @@ public class Algorithm implements UserRequest {
 		JSONObject message = new JSONObject();
 		JSONObject move = new JSONObject(), rookMove = new JSONObject();
 		String castling = "NONE";
+		String castlingTile = null, castlingUnit = null;
 		char color = player.getColor().charAt(0);
 		color = Character.toUpperCase(color);
 		int src_position[] = getPosition(srcTile); 
@@ -334,9 +337,34 @@ public class Algorithm implements UserRequest {
 			if(Math.abs(src_position[0] - dest_position[0]) == 2)src_unit.pawnTwoMoved = true;
 		}
 		else if(src_unit.unit == 'K'){
-			/*if(){
+			if(Math.abs(src_position[1] - dest_position[1]) == 2){
 				castling = "CASTLING";
-			}*/
+			}
+			if(dest_position[1] == 2){
+				if(src_unit.color == 'W'){
+					//WR1 -> 3
+					castlingUnit = "WR1";
+					castlingTile = "C1";
+				}
+				else{
+					//BR2 -> 3
+					castlingUnit = "BR2";
+					castlingTile = "C8";
+					
+				}
+			}
+			else if(dest_position[1] == 6){
+				if(src_unit.color == 'W'){
+					//WR2 -> 5
+					castlingUnit = "WR2";
+					castlingTile = "F1";
+				}
+				else{
+					//BR1 -> 5
+					castlingUnit = "BR1";
+					castlingTile = "F8";
+				}
+			}
 		}
 		
 		
@@ -345,8 +373,9 @@ public class Algorithm implements UserRequest {
 		move.put("srcPiece",src_unit.name);
 		move.put("destTile",destTile);
 		message.put("move",move);
-		//rookMove.put("srcPiece", value);
-		//rookMove.put("destTile", value);
+		
+		rookMove.put("srcPiece", castlingUnit);
+		rookMove.put("destTile", castlingTile);
 		message.put("rookMove", rookMove);
 		return message;
 	}	
@@ -366,13 +395,48 @@ public class Algorithm implements UserRequest {
 	}
 	
 	@Override
-	public boolean isCheckmate(){
-		
+	public boolean isCheckmate(char color){
+		int i,j;
+		JSONArray moves = null;
+		if(isCheck(color)){
+			for(i=0;i<8;i++){
+				for(j=0;j<8;j++){
+					if(board[i][j].unit == 'K'){
+						if(board[i][j].color == color){
+							moves = getKingMove(i,j);
+						}
+					}
+				}
+			}	
+		}
+		if(moves.size() == 0) return true;
 		return false;
 	}
 	
 	@Override
-	public boolean isCheck(){
+	public boolean isCheck(char color){
+		int check[][] = new int[8][8];
+		int kingX, kingY, i, j;
+		JSONArray moves = new JSONArray();
+		for(i=0;i<8;i++){
+			for(j=0;j<8;j++){
+				if(board[i][j].unit == 'K'){
+					if(board[i][j].color == color){
+						kingX = i;
+						kingY = j;
+					}
+				}
+			}
+		}
+		
+		for(i=0;i<8;i++){
+			for(j=0;j<8;j++){
+				if(board[i][j].color != color){
+					moves = getMovable(getTile(i,j));
+					
+				}
+			}
+		}
 		return false;
 	}
 
