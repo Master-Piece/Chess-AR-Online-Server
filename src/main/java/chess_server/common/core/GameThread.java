@@ -114,6 +114,11 @@ public class GameThread implements Runnable {
 		info("Turn Data(" + currentPlayer.getColor() + "): " + turnData.toJSONString());
 		sender.noticeTurn(currentPlayer.getGcmToken(), turnData);
 		
+		if (chessBoard.isCheckmate()) {
+			gameFlag = false;
+			return;
+		}
+		
 		currentPlayer.setPhase(Phase.SELECT);
 		info(currentPlayer.getColor() + "'s Turn!");
 		
@@ -128,16 +133,19 @@ public class GameThread implements Runnable {
 		setTurnData();
 		currentPlayer.setPhase(Phase.WAIT);
 		info(currentPlayer.getColor() + "Turn End");
+		moveFlag = true;
 	}
 	
 	private void setTurnData() {
 		boolean checkFlag = chessBoard.isCheck(currentPlayer.getColor().toUpperCase().charAt(0));
-		boolean checkMateFlag = chessBoard.isCheckmate(currentPlayer.getColor().toUpperCase().charAt(0));
+//		boolean checkFlag = chessBoard.isCheck();
+//		boolean checkMateFlag = chessBoard.isCheckmate(currentPlayer.getColor().toUpperCase().charAt(0));
+		boolean checkMateFlag = chessBoard.isCheckmate();
 		
 		turnData.clear();
 		
 		if (checkMateFlag) {
-			turnData.put("type", "YOU LOSE");
+			turnData.put("type", "YOU_LOSE");
 			turnData.put("status", "CHECKMATE");
 			JSONObject move = new JSONObject();
 			move.put("srcPiece", currentPlayer.getRecentMoveObject());
@@ -147,11 +155,12 @@ public class GameThread implements Runnable {
 			sender.winnerNotice(getSessionKey(), currentPlayer.getGcmToken(), "CHECKMATE");
 		}
 		else {
-			turnData.put("type", "YOUR TURN");
+			turnData.put("type", "YOUR_TURN");
 			JSONObject move = new JSONObject();
 			move.put("srcPiece", currentPlayer.getRecentMoveObject());
 			move.put("destTile", currentPlayer.getRecentMoveDestnation());
 			move.put("targetPiece", currentPlayer.getRecentMoveTarget());
+			info("move in setTurnData: " + move.toJSONString());
 			turnData.put("move", move);
 			turnData.put("check", checkFlag);
 		}
@@ -206,13 +215,15 @@ public class GameThread implements Runnable {
 	 *     "error": : error code }
 	 * */
 	public String availableTiles(String tile, Player player) {
+		JSONObject json = chessBoard.select(player, tile);
+		json.put("sessionKey", getSessionKey());
+		json.put("userId", player.getId());
+		
 		synchronized(thread) {
 			awakeThread(selectFlag);
 			thread.notify();
 		}
-		JSONObject json = chessBoard.select(player, tile);
-		json.put("sessionKey", getSessionKey());
-		json.put("userId", player.getId());
+		
 		return json.toJSONString();
 	}
 	
@@ -229,17 +240,19 @@ public class GameThread implements Runnable {
 	 *     "error": : error code }
 	 * */
 	public String userMoveTile(Player player, String srcTile, String destTile) {
+		JSONObject json = chessBoard.move(player, srcTile, destTile);
+		json.put("sessionKey", getSessionKey());
+		json.put("userId", player.getId());
+		JSONObject move = (JSONObject) json.get("move");
+		info("move: " + move.toJSONString());
+		currentPlayer.setRecentMove((String) move.get("srcPiece"), (String) move.get("destTile"));
+		
 		synchronized(thread) {
 			moveFlag = false;
 			awakeThread(selectFlag);
 			thread.notify();
 		}
 		
-		JSONObject json = chessBoard.move(player, srcTile, destTile);
-		json.put("sessionKey", getSessionKey());
-		json.put("userId", player.getId());
-		JSONObject move = (JSONObject) json.get("move");
-		currentPlayer.setRecentMove((String) move.get("srcPiece"), (String) move.get("destTile"));
 		return json.toJSONString();
 	}
 	

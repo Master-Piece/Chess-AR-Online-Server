@@ -142,7 +142,7 @@ public class ManagerController {
 	
 	@RequestMapping(value="manager/enqueueUser.cao", method=RequestMethod.POST)
 	public void enqueueUser(CommandMap commandMap, HttpServletResponse response) {
-		String gcmToken = (String) commandMap.get("token");
+		String gcmToken = (String) commandMap.get("gcmToken");
 		String nick = (String) commandMap.get("nick");
 		
 		Player player = new Player(gcmToken, nick);
