@@ -62,7 +62,7 @@ public class GameThread implements Runnable {
 				else {
 					info("Time out!!! " + currentPlayer.getColor() + "LOSE");
 					info("END SESSION");
-					
+					sender.timeoutNotice(getSessionKey(), currentPlayer.getId());
 					break;
 				}
 			}
