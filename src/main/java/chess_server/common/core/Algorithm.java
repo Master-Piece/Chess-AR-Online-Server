@@ -3,8 +3,6 @@ package chess_server.common.core;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-
-
 public class Algorithm {
 	class Piece{
 		char unit;
@@ -24,15 +22,17 @@ public class Algorithm {
 		}
 	}
 	
-	private Piece[][] board = {			
-			{new Piece("WR1"),new Piece("WN1"),new Piece("WB1"),new Piece("WQ"),new Piece("WK"),new Piece("WB2"),new Piece("WN2"),new Piece("WR2")},
-			{new Piece("WP1"),new Piece("WP2"),new Piece("WP3"),new Piece("WP4"),new Piece("WP5"),new Piece("WP6"),new Piece("WP7"),new Piece("WP8")},
+	private Piece[][] board = {
+			
+			{new Piece("WR1"), null, null, null,new Piece("WK"), null, null, new Piece("WR2")},
 			{null, null, null, null, null, null, null, null},
 			{null, null, null, null, null, null, null, null},
 			{null, null, null, null, null, null, null, null},
 			{null, null, null, null, null, null, null, null},
-			{new Piece("BP8"),new Piece("BP7"),new Piece("BP6"),new Piece("BP5"),new Piece("BP4"),new Piece("BP3"),new Piece("BP2"),new Piece("BP1")},
-			{new Piece("BR2"),new Piece("BN2"),new Piece("BB2"),new Piece("BQ"),new Piece("BK"),new Piece("BB1"),new Piece("BN1"),new Piece("BR1")}				
+			{null, null, null, null, null, null, null, null},
+			{null, null, null, null, null, null, null, null},
+			{new Piece("BR2"), null, null, null, new Piece("BK"), null, null, new Piece("BR1")}
+				
 	};
 
 	public void print(){
@@ -92,9 +92,9 @@ public class Algorithm {
 		}
 		
 		//캐슬링 체크하기 
-		if(unit.isFirstMove && !isCheck(color)){
+		if(flag == 1 && unit.isFirstMove && !isCheck(color)){
 			//왼쪽
-			if(board[x][y-1] == null && board[x][y-2] == null && board[x][y-2] == null && board[x][y-3] != null && board[x][y-3].isFirstMove){
+			if(board[x][y-1] == null && board[x][y-2] == null && board[x][y-3] == null && board[x][y-4] != null && board[x][y-4].isFirstMove){
 				Piece king = board[x][y];
 				board[x][y-1] = king;
 				board[x][y] = null;
@@ -110,7 +110,7 @@ public class Algorithm {
 				board[x][y-2] = null;
 			}
 			//오른쪽
-			if(board[x][y+1] == null && board[x][y+2] == null  && board[x][y+2] != null && board[x][y+2].isFirstMove){
+			if(board[x][y+1] == null && board[x][y+2] == null  && board[x][y+2] == null && board[x][y+3] != null && board[x][y+3].isFirstMove){
 				Piece king = board[x][y];
 				board[x][y+1] = king;
 				board[x][y] = null;
@@ -310,8 +310,6 @@ public class Algorithm {
 		char color = player.getColor().charAt(0);
 		color = Character.toUpperCase(color);
 		
-		
-		
 		if(unit != null && color == unit.color){
 			//이동가능한 타일들 모아서 보내줌
 			JSONArray moves = getMovable(tile, 1);	
@@ -381,7 +379,6 @@ public class Algorithm {
 			}
 		}
 		
-		
 		message.put("type", "MOVE_SUCCESS");
 		message.put("state", castling);
 		move.put("srcPiece",src_unit.name);
@@ -424,14 +421,22 @@ public class Algorithm {
 	}
 	
 	
-	public boolean isCheck(){
-		
+	public boolean isCheck(){	
 		return isCheck('W') || isCheck('B');
 	}
 	
 	public boolean isCheck(char color){
 		System.out.println("ischeck called\n");
-		int check[][] = new int[8][8];
+		int check[][] = {
+				{0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0, 0, 0, 0}
+		};
 		int kingX = 0, kingY = 0, i, j;
 		JSONArray moves = new JSONArray();
 		for(i=0;i<8;i++){
