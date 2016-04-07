@@ -1,4 +1,4 @@
-package chess_server.common.core;
+package chess_test;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -24,7 +24,7 @@ public class Algorithm {
 		}
 	}
 	
-	private Piece[][] board = {
+	private Piece[][] board = {			
 			{new Piece("WR1"),new Piece("WN1"),new Piece("WB1"),new Piece("WQ"),new Piece("WK"),new Piece("WB2"),new Piece("WN2"),new Piece("WR2")},
 			{new Piece("WP1"),new Piece("WP2"),new Piece("WP3"),new Piece("WP4"),new Piece("WP5"),new Piece("WP6"),new Piece("WP7"),new Piece("WP8")},
 			{null, null, null, null, null, null, null, null},
@@ -32,7 +32,8 @@ public class Algorithm {
 			{null, null, null, null, null, null, null, null},
 			{null, null, null, null, null, null, null, null},
 			{new Piece("BP8"),new Piece("BP7"),new Piece("BP6"),new Piece("BP5"),new Piece("BP4"),new Piece("BP3"),new Piece("BP2"),new Piece("BP1")},
-			{new Piece("BR2"),new Piece("BN2"),new Piece("BB2"),new Piece("BQ"),new Piece("BK"),new Piece("BB1"),new Piece("BN1"),new Piece("BR1")}};
+			{new Piece("BR2"),new Piece("BN2"),new Piece("BB2"),new Piece("BQ"),new Piece("BK"),new Piece("BB1"),new Piece("BN1"),new Piece("BR1")}				
+	};
 
 	public void print(){
 		int i,j;
@@ -44,6 +45,7 @@ public class Algorithm {
 			System.out.println();
 		}
 	}
+	
 	private Piece getPiece(int x, int y){
 		return board[x][y];
 	}
@@ -72,7 +74,7 @@ public class Algorithm {
 		return tile;
 	}
 	
-	private JSONArray getKingMove(int x,int y){
+	private JSONArray getKingMove(int x,int y, int flag){
 		JSONArray moves = new JSONArray();
 		char color = getPiece(x,y).color;
 		int dx[] = {1, 1, 0, -1, -1, -1, 0, 1};
@@ -89,7 +91,11 @@ public class Algorithm {
 			unit = getPiece(nx,ny);
 			
 			if(unit == null){
-				moves.add(getTile(nx,ny));
+				if(flag == 1){
+					//nx,ny로 미리 옮겨놓고 체크인지 확인해보고 체크면 안넣고, 아니면 넣고
+					if(isCheck(color))moves.add(getTile(nx,ny));
+				}
+				
 			}
 			else{
 				// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
@@ -103,7 +109,7 @@ public class Algorithm {
 		return moves;
 	}
 	
-	private JSONArray getQueenMove(int x,int y){
+	private JSONArray getQueenMove(int x,int y, int flag){
 		JSONArray moves = new JSONArray();
 		int i,j, nx, ny;
 		int dx[] = {1, 1, 0, -1, -1, -1, 0, 1};
@@ -135,7 +141,7 @@ public class Algorithm {
 		return moves;
 	}
 	
-	private JSONArray getBishopMove(int x,int y){
+	private JSONArray getBishopMove(int x,int y, int flag){
 		JSONArray moves = new JSONArray();
 		int dx[] = {1,-1,-1,1};
 		int dy[] = {1,1,-1,-1};
@@ -164,7 +170,7 @@ public class Algorithm {
 		return moves;
 	}
 	
-	private JSONArray getRookMove(int x,int y){
+	private JSONArray getRookMove(int x,int y, int flag){
 		JSONArray moves = new JSONArray();
 		int dx[] = {1,0,-1,0};
 		int dy[] = {0,1,0,-1};
@@ -194,7 +200,7 @@ public class Algorithm {
 		return moves;
 	}
 	
-	private JSONArray getKnightMove(int x,int y){
+	private JSONArray getKnightMove(int x,int y, int flag){
 		JSONArray moves = new JSONArray();
 		int dx[] = {2, 1, -1, -2, -2, -1, 1, 2};
 		int dy[] = {1, 2, 2, 1, -1, -2, -2, -1};
@@ -219,7 +225,7 @@ public class Algorithm {
 		return moves;
 	}
 	
-	private JSONArray getPawnMove(int x,int y){
+	private JSONArray getPawnMove(int x,int y, int flag){
 		/*2칸 전진, 대각선에 적 기물 잡기, 1칸 전진*/
 		JSONArray moves = new JSONArray();
 		Piece unit = getPiece(x,y);
@@ -267,7 +273,8 @@ public class Algorithm {
 		return moves;
 	}
 		
-	private JSONArray getMovable(String tile){
+	private JSONArray getMovable(String tile, int flag){
+		//tile의 이동 가능 경로 리턴, flag는 이동했을시 check인지 아닌지 확인 여부 
 		JSONArray moves = new JSONArray();
 		
 		int position[] = getPosition(tile);
@@ -277,22 +284,22 @@ public class Algorithm {
 		
 		char c = unit.unit;
 		if(c ==  'K'){
-			moves = getKingMove(x,y);
+			moves = getKingMove(x,y, flag);
 		}
 		else if(c == 'Q'){
-			moves = getQueenMove(x,y);
+			moves = getQueenMove(x,y, flag);
 		}
 		else if(c == 'B'){
-			moves = getBishopMove(x,y);
+			moves = getBishopMove(x,y, flag);
 		}
 		else if(c == 'R'){
-			moves = getRookMove(x,y);
+			moves = getRookMove(x,y, flag);
 		}
 		else if(c == 'N'){
-			moves = getKnightMove(x,y);
+			moves = getKnightMove(x,y, flag);
 		}
 		else if(c == 'P'){
-			moves = getPawnMove(x,y);
+			moves = getPawnMove(x,y, flag);
 		}
 		return moves;
 	}
@@ -308,7 +315,7 @@ public class Algorithm {
 		
 		if(unit != null && color == unit.color){
 			//이동가능한 타일들 모아서 보내줌
-			JSONArray moves = getMovable(tile);	
+			JSONArray moves = getMovable(tile, 1);	
 			message.put("type", "SELECT_SUCCESS");
 			message.put("piece",  unit.name);
 			message.put("tiles", moves);
@@ -389,13 +396,6 @@ public class Algorithm {
 	}	
 	
 	
-
-	public JSONObject surrender(Player player) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	
 	public String whoWin() {
 		// TODO Auto-generated method stub
 		return null;
@@ -403,7 +403,7 @@ public class Algorithm {
 	
 	
 	public boolean isCheckmate(){
-		return false;
+		return isCheckmate('W') || isCheckmate('B');
 	}
 	
 	public boolean isCheckmate(char color){
@@ -414,7 +414,7 @@ public class Algorithm {
 				for(j=0;j<8;j++){
 					if(board[i][j].unit == 'K'){
 						if(board[i][j].color == color){
-							moves = getKingMove(i,j);
+							moves = getKingMove(i,j, 0);
 						}
 					}
 				}
@@ -426,16 +426,18 @@ public class Algorithm {
 	
 	
 	public boolean isCheck(){
-		return false;
+		
+		return isCheck('W') || isCheck('B');
 	}
 	
 	public boolean isCheck(char color){
+		System.out.println("ischeck called\n");
 		int check[][] = new int[8][8];
-		int kingX, kingY, i, j;
+		int kingX = 0, kingY = 0, i, j;
 		JSONArray moves = new JSONArray();
 		for(i=0;i<8;i++){
 			for(j=0;j<8;j++){
-				if(board[i][j].unit == 'K'){
+				if(board[i][j] != null && board[i][j].unit == 'K'){
 					if(board[i][j].color == color){
 						kingX = i;
 						kingY = j;
@@ -446,12 +448,22 @@ public class Algorithm {
 		
 		for(i=0;i<8;i++){
 			for(j=0;j<8;j++){
-				if(board[i][j].color != color){
-					moves = getMovable(getTile(i,j));
-					
+				if(board[i][j] != null && board[i][j].color != color){
+					moves = getMovable(getTile(i,j),0);
+					for(int k = 0; k < moves.size();k++){
+						int positions[] = getPosition(moves.get(k).toString());
+						check[positions[0]][positions[1]] = 1;
+					}
 				}
 			}
 		}
+		for(i=0;i<8;i++){
+			for(j=0;j<8;j++){
+				System.out.print(check[i][j] + " ");
+			}
+			System.out.println();
+		}
+		if(check[kingX][kingY] == 1) return true;
 		return false;
 	}
 
