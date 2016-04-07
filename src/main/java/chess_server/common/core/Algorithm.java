@@ -1,4 +1,4 @@
-package chess_test;
+package chess_server.common.core;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
