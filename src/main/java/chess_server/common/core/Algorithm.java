@@ -75,37 +75,57 @@ public class Algorithm {
 	}
 	
 	private JSONArray getKingMove(int x,int y, int flag){
-		JSONArray moves = new JSONArray();
-		char color = getPiece(x,y).color;
+		JSONArray moves = new JSONArray();		
 		int dx[] = {1, 1, 0, -1, -1, -1, 0, 1};
-		int dy[] = {0, 1, 1, 1, 0, -1, -1, -1};
-		
+		int dy[] = {0, 1, 1, 1, 0, -1, -1, -1};	
 		int i, nx, ny;
-		Piece unit;
+		Piece target, unit = getPiece(x,y);
+		char color = unit.color;
 		
 		for(i=0;i<8;i++){
 			nx = x + dx[i];
 			ny = y + dy[i];
-			
 			if(!isInRange(nx,ny)) continue;
-			unit = getPiece(nx,ny);
-			
-			if(unit == null){
-				if(flag == 1){
-					//nx,ny로 미리 옮겨놓고 체크인지 확인해보고 체크면 안넣고, 아니면 넣고
-					if(isCheck(color))moves.add(getTile(nx,ny));
-				}
-				
-			}
-			else{
-				// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-				if(unit.color == color) continue; //같은 플레이어의 말, 넘김
-				moves.add(getTile(nx,ny)); 
-			}
+			target = getPiece(nx,ny);
+			if(target != null && target.color == color) continue;
+			pushMoves(x,y,nx,ny,flag,color,moves);		
 		}
 		
 		//캐슬링 체크하기 
-		
+		if(unit.isFirstMove && !isCheck(color)){
+			//왼쪽
+			if(board[x][y-1] == null && board[x][y-2] == null && board[x][y-2] == null && board[x][y-3] != null && board[x][y-3].isFirstMove){
+				Piece king = board[x][y];
+				board[x][y-1] = king;
+				board[x][y] = null;
+				if(!isCheck(color)){
+					board[x][y-2] = king;
+					board[x][y-1] = null;
+					if(!isCheck(color)){
+						moves.add(getTile(x,y-2));
+					}
+				}
+				board[x][y] = king;
+				board[x][y-1] = null;
+				board[x][y-2] = null;
+			}
+			//오른쪽
+			if(board[x][y+1] == null && board[x][y+2] == null  && board[x][y+2] != null && board[x][y+2].isFirstMove){
+				Piece king = board[x][y];
+				board[x][y+1] = king;
+				board[x][y] = null;
+				if(!isCheck(color)){
+					board[x][y+2] = king;
+					board[x][y+1] = null;
+					if(!isCheck(color)){
+						moves.add(getTile(x,y+2));
+					}
+				}
+				board[x][y] = king;
+				board[x][y+1] = null;
+				board[x][y+2] = null;
+			}
+		}
 		return moves;
 	}
 	
@@ -117,8 +137,7 @@ public class Algorithm {
 		Piece unit = getPiece(x,y), target;
 		
 		char color = unit.color;
-		
-		
+				
 		for(i=0;i<8;i++){ //방향
 			for(j=1;j<=8;j++){  //길이
 				nx = x + dx[i]*j;
@@ -126,15 +145,9 @@ public class Algorithm {
 				
 				if(!isInRange(nx,ny)) break; //보드 범위 밖이므로 더이상 체크 하지 않는다
 				target = getPiece(nx,ny);
-				
-				if(target == null){
-					moves.add(getTile(nx,ny));
-				}
-				else{
-					// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-					if(target.color != color) moves.add(getTile(nx,ny)); 
-					break;
-				}
+				if(target != null && target.color == color) break;
+				pushMoves(x,y,nx,ny,flag,color,moves);
+				if(target != null) break;
 			}
 		}
 		
@@ -157,14 +170,9 @@ public class Algorithm {
 				if(!isInRange(nx,ny)) break;
 				target = getPiece(nx,ny);
 				
-				if(target == null){
-					moves.add(getTile(nx,ny));
-				}
-				else{
-					// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-					if(target.color != color) moves.add(getTile(nx,ny)); 
-					break;
-				}
+				if(target != null && target.color == color) break;
+				pushMoves(x,y,nx,ny,flag,color,moves);	
+				if(target != null) break;
 			}
 		}
 		return moves;
@@ -186,15 +194,9 @@ public class Algorithm {
 				if(!isInRange(nx,ny)) break;
 				target = getPiece(nx,ny);
 				
-				if(target == null){
-					moves.add(getTile(nx,ny));
-				}
-				else{
-					// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-					if(target.color != color) moves.add(getTile(nx,ny)); 
-					break;
-				}
-				
+				if(target != null && target.color == color) break;
+				pushMoves(x,y,nx,ny,flag,color,moves);
+				if(target != null) break;
 			}
 		}
 		return moves;
@@ -214,13 +216,8 @@ public class Algorithm {
 			if(!isInRange(nx,ny)) continue;
 			target = getPiece(nx,ny);
 			
-			if(target == null){
-				moves.add(getTile(nx,ny));
-			}
-			else{
-				// (nx,ny)에 내 말이 없는지, 또 적 킹이 없는지 확인 --> 이동 가능 범위에 킹이 있으면 체크메이트 상태이므로, 무브가 될 수 없다.
-				if(target.color != color) moves.add(getTile(nx,ny)); 
-			}
+			if(target != null && target.color == color) continue;
+			pushMoves(x,y,nx,ny,flag,color,moves);
 		}
 		return moves;
 	}
@@ -231,48 +228,50 @@ public class Algorithm {
 		Piece unit = getPiece(x,y);
 		Piece oneFrontUnit = null, twoFrontUnit = null, crossUnit;
 		char color = unit.color;
-		if(color == 'W'){
-			//전진 체크
-			if(isInRange(x+1,y)) oneFrontUnit = getPiece(x+1,y);
-			if(oneFrontUnit == null){
-				moves.add(getTile(x+1,y));
-				if(!unit.pawnTwoMoved){ //2칸 전진 가능
-					twoFrontUnit = getPiece(x+2,y);
-					if(twoFrontUnit == null) moves.add(getTile(x+2,y));
-				}
+		int dx;
+		if(color == 'W') dx = 1;
+		else dx = -1;
+		
+		//전진 체크
+		if(isInRange(x + dx,y)) oneFrontUnit = getPiece(x+dx,y);
+		if(oneFrontUnit == null){
+			pushMoves(x,y,x+dx,y,flag,color,moves);
+			if(!unit.pawnTwoMoved){ //2칸 전진 가능
+				twoFrontUnit = getPiece(x+2*dx,y);
+				if(twoFrontUnit == null) pushMoves(x,y,x+2*dx,y,flag,color,moves);
 			}
-			//대각체크
-			if(isInRange(x+1,y-1)){
-				crossUnit = getPiece(x+1,y-1);
-				if(crossUnit != null && color != crossUnit.color) moves.add(getTile(x+1,y-1));
-			}
-			if(isInRange(x+1,y+1)){
-				crossUnit = getPiece(x+1,y+1);
-				if(crossUnit != null && color != crossUnit.color) moves.add(getTile(x+1,y+1));			
-			}			
 		}
-		else{
-			if(isInRange(x-1,y)) oneFrontUnit = getPiece(x-1,y);
-			if(oneFrontUnit == null){
-				moves.add(getTile(x-1,y));
-				if(!unit.pawnTwoMoved){ //2칸 전진 가능
-					twoFrontUnit = getPiece(x-2,y);
-					if(twoFrontUnit==null) moves.add(getTile(x-2,y));
-				}
-			}
-			//대각체크
-			if(isInRange(x-1,y-1)){
-				crossUnit = getPiece(x-1,y-1);
-				if(crossUnit != null && color != crossUnit.color) moves.add(getTile(x-1,y-1));
-			}
-			if(isInRange(x-1,y+1)){
-				crossUnit = getPiece(x-1,y+1);
-				if(crossUnit != null && color != crossUnit.color) moves.add(getTile(x-1,y+1));		
-			}	
+		
+		//대각체크
+		if(isInRange(x+dx,y-1)){
+			crossUnit = getPiece(x+dx,y-1);
+			if(crossUnit != null && color != crossUnit.color) pushMoves(x,y,x+dx,y-1,flag,color,moves);
 		}
+		if(isInRange(x+dx,y+1)){
+			crossUnit = getPiece(x+dx,y+1);
+			if(crossUnit != null && color != crossUnit.color) pushMoves(x,y,x+dx,y+1,flag,color,moves);			
+		}
+				
 		return moves;
 	}
+	
+	private boolean pushMoves(int x,int y, int nx, int ny, int flag, char color, JSONArray moves){
+		boolean result = false;
+		if(flag == 1){
+			//nx,ny로 미리 옮겨놓고 체크인지 확인해보고 체크면 안넣고, 아니면 넣고
+			Piece tmp = board[nx][ny];
+			board[nx][ny] = board[x][y];
+			board[x][y] = null;
+			result = isCheck(color);
+			if(!result)moves.add(getTile(nx,ny));
+			board[x][y] = board[nx][ny];
+			board[nx][ny] = tmp;
+		}
+		else moves.add(getTile(nx,ny));
 		
+		return !result;
+	}	
+	
 	private JSONArray getMovable(String tile, int flag){
 		//tile의 이동 가능 경로 리턴, flag는 이동했을시 check인지 아닌지 확인 여부 
 		JSONArray moves = new JSONArray();
@@ -347,12 +346,13 @@ public class Algorithm {
 		
 		board[src_position[0]][src_position[1]] = null;
 		board[dest_position[0]][dest_position[1]] = src_unit;
+		src_unit.isFirstMove = false;
 		
 		if(src_unit.unit == 'P'){
 			if(Math.abs(src_position[0] - dest_position[0]) == 2)src_unit.pawnTwoMoved = true;
 		}
 		else if(src_unit.unit == 'K'){
-			if(Math.abs(src_position[1] - dest_position[1]) == 2){
+			if(Math.abs(src_position[1] - dest_position[1]) >= 2){
 				castling = "CASTLING";
 			}
 			if(dest_position[1] == 2){
@@ -365,7 +365,6 @@ public class Algorithm {
 					//BR2 -> 3
 					castlingUnit = "BR2";
 					castlingTile = "C8";
-					
 				}
 			}
 			else if(dest_position[1] == 6){
