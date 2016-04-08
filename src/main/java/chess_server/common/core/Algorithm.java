@@ -8,30 +8,28 @@ public class Algorithm {
 		char unit;
 		String name;
 		boolean isFirstMove;
-		boolean enPassant;
-		boolean pawnTwoMoved;
+		String enPassant;
 		char color;
 		
 		Piece(String name){
 			this.name = name;
 			this.unit = name.charAt(1);
 			isFirstMove = true;
-			enPassant = false;
+			enPassant = null;
 			color = name.charAt(0);
-			pawnTwoMoved = false;
 		}
 	}
 	
 	private Piece[][] board = {
 			
-			{new Piece("WR1"), null, null, null,new Piece("WK"), null, null, new Piece("WR2")},
 			{null, null, null, null, null, null, null, null},
 			{null, null, null, null, null, null, null, null},
+			{null, null, null, null, new Piece("WK"), null, null, null},
+			{null, null, null, null, null, null, null, null},
+			{null, null, null, new Piece("WQ"), new Piece("WB1"), null, null, null},
 			{null, null, null, null, null, null, null, null},
 			{null, null, null, null, null, null, null, null},
-			{null, null, null, null, null, null, null, null},
-			{null, null, null, null, null, null, null, null},
-			{new Piece("BR2"), null, null, null, new Piece("BK"), null, null, new Piece("BR1")}
+			{null, null, new Piece("BK"), null, null, null, null, null}
 				
 	};
 
@@ -94,7 +92,7 @@ public class Algorithm {
 		//캐슬링 체크하기 
 		if(flag == 1 && unit.isFirstMove && !isCheck(color)){
 			//왼쪽
-			if(board[x][y-1] == null && board[x][y-2] == null && board[x][y-3] == null && board[x][y-4] != null && board[x][y-4].isFirstMove){
+			if(isInRange(x,y-1) && isInRange(x,y-2) && isInRange(x,y-3) && isInRange(x,y-4) && board[x][y-1] == null && board[x][y-2] == null && board[x][y-3] == null && board[x][y-4] != null && board[x][y-4].isFirstMove){
 				Piece king = board[x][y];
 				board[x][y-1] = king;
 				board[x][y] = null;
@@ -110,7 +108,7 @@ public class Algorithm {
 				board[x][y-2] = null;
 			}
 			//오른쪽
-			if(board[x][y+1] == null && board[x][y+2] == null  && board[x][y+2] == null && board[x][y+3] != null && board[x][y+3].isFirstMove){
+			if(isInRange(x,y+1) && isInRange(x,y+2) && isInRange(x,y+3) && board[x][y+1] == null && board[x][y+2] == null  && board[x][y+2] == null && board[x][y+3] != null && board[x][y+3].isFirstMove){
 				Piece king = board[x][y];
 				board[x][y+1] = king;
 				board[x][y] = null;
@@ -236,7 +234,7 @@ public class Algorithm {
 		if(isInRange(x + dx,y)) oneFrontUnit = getPiece(x+dx,y);
 		if(oneFrontUnit == null){
 			pushMoves(x,y,x+dx,y,flag,color,moves);
-			if(!unit.pawnTwoMoved){ //2칸 전진 가능
+			if(unit.isFirstMove){ //2칸 전진 가능
 				twoFrontUnit = getPiece(x+2*dx,y);
 				if(twoFrontUnit == null) pushMoves(x,y,x+2*dx,y,flag,color,moves);
 			}
@@ -251,7 +249,12 @@ public class Algorithm {
 			crossUnit = getPiece(x+dx,y+1);
 			if(crossUnit != null && color != crossUnit.color) pushMoves(x,y,x+dx,y+1,flag,color,moves);			
 		}
-				
+		
+		//앙파상 체크
+		if(unit.enPassant != null){
+			int positions[] = getPosition(unit.enPassant);
+			moves.add(getTile(positions[0]+dx,positions[1]));
+		}
 		return moves;
 	}
 	
@@ -267,8 +270,7 @@ public class Algorithm {
 			board[x][y] = board[nx][ny];
 			board[nx][ny] = tmp;
 		}
-		else moves.add(getTile(nx,ny));
-		
+		else moves.add(getTile(nx,ny));		
 		return !result;
 	}	
 	
@@ -345,12 +347,28 @@ public class Algorithm {
 		board[src_position[0]][src_position[1]] = null;
 		board[dest_position[0]][dest_position[1]] = src_unit;
 		src_unit.isFirstMove = false;
-		
+			
 		if(src_unit.unit == 'P'){
-			if(Math.abs(src_position[0] - dest_position[0]) == 2)src_unit.pawnTwoMoved = true;
+			if(Math.abs(src_position[0] - dest_position[0]) == 2){
+				int nx = dest_position[0], ny = dest_position[1]+1;
+				if(isInRange(nx,ny) && board[nx][ny] != null && board[nx][ny].unit == 'P' && board[nx][ny].color != src_unit.color){
+					board[nx][ny].enPassant = getTile(nx,ny);
+				}
+				nx = dest_position[0]; ny = dest_position[1]-1;
+				if(isInRange(nx,ny) && board[nx][ny] != null && board[nx][ny].unit == 'P' && board[nx][ny].color != src_unit.color){
+					board[nx][ny].enPassant = getTile(nx,ny);
+				}
+			}
+			if(src_unit.enPassant != null){				
+				//앙파상 플래그 true에 대각 움직임 -> 100% 앙파상
+				if(Math.abs(src_position[1] - dest_position[1]) == 1){
+					dest_unit = getPiece(src_unit.enPassant);
+				}
+				src_unit.enPassant = null;
+			}
 		}
 		else if(src_unit.unit == 'K'){
-			if(Math.abs(src_position[1] - dest_position[1]) >= 2){
+			if(Math.abs(src_position[1] - dest_position[1]) == 2){
 				castling = "CASTLING";
 			}
 			if(dest_position[1] == 2){
@@ -377,12 +395,19 @@ public class Algorithm {
 					castlingTile = "F8";
 				}
 			}
+		}	
+		for(int i=0;i<8;i++){
+			for(int j=0;j<8;j++){
+				if(board[i][j] == null) continue;
+				if(board[i][j].color == color && board[i][j].unit == 'P') board[i][j].enPassant = null;
+			}
 		}
 		
 		message.put("type", "MOVE_SUCCESS");
 		message.put("state", castling);
 		move.put("srcPiece",src_unit.name);
 		move.put("destTile",destTile);
+		move.put("targetPiece", dest_unit.name);
 		message.put("move",move);
 		
 		rookMove.put("srcPiece", castlingUnit);
@@ -390,12 +415,6 @@ public class Algorithm {
 		message.put("rookMove", rookMove);
 		return message;
 	}	
-	
-	
-	public String whoWin() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
 	
 	public boolean isCheckmate(){
@@ -461,14 +480,21 @@ public class Algorithm {
 				}
 			}
 		}
-		for(i=0;i<8;i++){
-			for(j=0;j<8;j++){
-				System.out.print(check[i][j] + " ");
-			}
-			System.out.println();
-		}
 		if(check[kingX][kingY] == 1) return true;
 		return false;
 	}
 
+	public boolean isStalemate(char color){
+		int i,j;
+		JSONArray moves;
+		for(i=0;i<8;i++){
+			for(j=0;j<8;j++){
+				if(board[i][j] != null &&  board[i][j].color == color){
+					moves = getMovable(getTile(i,j),1);
+					if(moves.size() != 0) return false;
+				}
+			}
+		}
+		return true;
+	}
 }
