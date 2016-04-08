@@ -22,15 +22,14 @@ public class Algorithm {
 	
 	private Piece[][] board = {
 			
-
-{null, null, null, null, null, null, null, null},
-{null, null, null, null, null, null, null, null},
-{null, null, null, null, new Piece("WK"), null, null, null},
-{null, null, null, null, null, null, null, null},
-{null, null, null, null, null, null, null, null},
-{null, null, null, null, null, null, null, null},
-{null, null, null, null, null, null, null, null},
-{null, null, new Piece("BK"), null, null, null, null, null}
+			{new Piece("WR1"),new Piece("WN1"),new Piece("WB1"),new Piece("WQ"),new Piece("WK"),new Piece("WB2"),new Piece("WN2"),new Piece("WR2")},
+			{new Piece("WP1"),new Piece("WP2"),new Piece("WP3"),new Piece("WP4"),new Piece("WP5"),new Piece("WP6"),new Piece("WP7"),new Piece("WP8")},
+			{null, null, null, null, null, null, null, null},
+			{null, null, null, null, null, null, null, null},
+			{null, null, null, null, null, null, null, null},
+			{null, null, null, null, null, null, null, null},
+			{new Piece("BP8"),new Piece("BP7"),new Piece("BP6"),new Piece("BP5"),new Piece("BP4"),new Piece("BP3"),new Piece("BP2"),new Piece("BP1")},
+			{new Piece("BR2"),new Piece("BN2"),new Piece("BB2"),new Piece("BQ"),new Piece("BK"),new Piece("BB1"),new Piece("BN1"),new Piece("BR1")}
 				
 	};
 
