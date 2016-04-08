@@ -22,14 +22,15 @@ public class Algorithm {
 	
 	private Piece[][] board = {
 			
-			{null, null, null, null, null, null, null, null},
-			{null, null, null, null, null, null, null, null},
-			{null, null, null, null, new Piece("WK"), null, null, null},
-			{null, null, null, null, null, null, null, null},
-			{null, null, null, new Piece("WQ"), new Piece("WB1"), null, null, null},
-			{null, null, null, null, null, null, null, null},
-			{null, null, null, null, null, null, null, null},
-			{null, null, new Piece("BK"), null, null, null, null, null}
+
+{null, null, null, null, null, null, null, null},
+{null, null, null, null, null, null, null, null},
+{null, null, null, null, new Piece("WK"), null, null, null},
+{null, null, null, null, null, null, null, null},
+{null, null, null, null, null, null, null, null},
+{null, null, null, null, null, null, null, null},
+{null, null, null, null, null, null, null, null},
+{null, null, new Piece("BK"), null, null, null, null, null}
 				
 	};
 
@@ -496,5 +497,84 @@ public class Algorithm {
 			}
 		}
 		return true;
+	}
+	
+	public boolean isDraw(){
+		int bk = 0, bq = 0, br = 0, bb = 0, bn = 0, bp = 0, bcnt = 0;
+		int wk = 0, wq = 0, wr = 0, wb = 0, wn = 0, wp = 0, wcnt = 0;
+		
+		for(int i=0;i<8;i++){
+			for(int j=0;j<8;j++){
+				if(board[i][j] != null && board[i][j].color == 'B'){
+					char c = board[i][j].unit;
+					if(c ==  'K'){
+						bk++;
+					}
+					else if(c == 'Q'){
+						bq++;
+					}
+					else if(c == 'B'){
+						bb++;
+					}
+					else if(c == 'R'){
+						br++;
+					}
+					else if(c == 'N'){
+						bn++;
+					}
+					else if(c == 'P'){
+						bp++;
+					}
+					bcnt++;
+				}
+				if(board[i][j] != null && board[i][j].color == 'W'){
+					char c = board[i][j].unit;
+					if(c ==  'K'){
+						wk++;
+					}
+					else if(c == 'Q'){
+						wq++;
+					}
+					else if(c == 'B'){
+						wb++;
+					}
+					else if(c == 'R'){
+						wr++;
+					}
+					else if(c == 'N'){
+						wn++;
+					}
+					else if(c == 'P'){
+						wp++;
+					}
+					wcnt++;
+				}
+			}
+		}
+	
+		if(bcnt == 1 && bk == 1 && wcnt == 1 && wk == 1) return true;
+		if(bcnt == 1 && bk == 1 && wcnt == 2 && wk == 1 && wb == 1) return true;
+		if(wcnt == 1 && wk == 1 && bcnt == 2 && bk == 1 && bb == 1) return true;
+		if(bcnt == 1 && bk == 1 && wcnt == 2 && wk == 1 && wn == 1) return true;
+		if(wcnt == 1 && wk == 1 && bcnt == 2 && bk == 1 && bn == 1) return true;
+		if(wcnt == 2 && wk == 1 && wb == 1 && bcnt == 2 && bk == 1 && bb == 1){
+			int wbx=0, wby=0, bbx=0, bby=0;
+			for(int i = 0; i < 8; i++){
+				for(int j = 0; j < 8; j++){
+					if(board[i][j] != null){
+						if(board[i][j].color == 'W' && board[i][j].unit == 'B'){
+							wbx = i;
+							wby = j;
+						}
+						if(board[i][j].color == 'B' && board[i][j].unit == 'B'){
+							bbx = i;
+							bby = j;
+						}
+					}
+				}
+			}
+			if((wbx + wby) % 2 == (bbx + bby)%2) return true;
+		}
+		return false;
 	}
 }
