@@ -71,37 +71,6 @@ public class GameThread implements Runnable {
 		GameCoreManager.getInstance().closeSession(getSessionKey());
 	}
 	
-	private void game(int test) throws InterruptedException {
-		if (turn == null) {
-			turn = Turn.white;
-			turnData.put("type", "YOUR_TURN");
-		}
-		else {
-			turn = (turn == Turn.black) ? Turn.white : Turn.black;
-		}
-		currentPlayer = (turn == Turn.black) ? blackPlayer : whitePlayer;
-		
-		// TODO: gcm으로 턴을 알려줌
-		currentPlayer.setPhase(Player.Phase.SELECT);
-		info(currentPlayer.getColor() + "'s Turn");
-		sender.noticeTurn(currentPlayer.getGcmToken(), turnData);
-		if (chessBoard.isCheckmate(currentPlayer.getColor().toUpperCase().charAt(0))) {
-			gameFlag = false;
-			return;
-		}
-		waitNextWithFlag(selectFlag);
-		// User selected tile.
-		log.debug("USER SELECTED. THREAD AWAKE");
-		
-		currentPlayer.setPhase(Player.Phase.MOVE);
-		waitNextWithFlag(moveFlag);
-		// User moved.
-		log.debug("USER MOVED. THREAD AWAKE");
-		currentPlayer.setPhase(Player.Phase.WAIT);
-		
-		setTurnData();
-	}
-	
 	private void game() throws InterruptedException {
 		if (turn == null) {
 			turn = Turn.white;
@@ -123,11 +92,11 @@ public class GameThread implements Runnable {
 		info(currentPlayer.getColor() + "'s Turn!");
 		
 		while (moveFlag) {  /* 플레이어가 움직이기 전에는 무한정 클릭 가능. 플레이어가 움직이면 moveFlag가 false가 되고  루프에서 탈출 한다. */
-			info(currentPlayer.getColor() + "Select please");
+			info(currentPlayer.getColor() + " Select please");
 			waitNext();
-			info(currentPlayer.getColor() + "User selected");
+			info(currentPlayer.getColor() + " User selected");
 		}
-		info(currentPlayer.getColor() + "User moved");
+		info(currentPlayer.getColor() + " User moved");
 		currentPlayer.setPhase(Phase.MOVE);
 		
 		setTurnData();
