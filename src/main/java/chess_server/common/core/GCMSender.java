@@ -107,6 +107,22 @@ public class GCMSender {
 		sendGCM(loser.getGcmToken(), loserJSON.toJSONString());
 	}
 	
+	public void stalemateNotice(long sessionKey, String userId) {
+		JSONObject json = new JSONObject();
+		json.put("type", "STALEMATE");
+		JSONObject move = new JSONObject();
+		move.put("srcPiece", "null");
+		move.put("destTile", "null");
+		move.put("targetPiece", "null");
+		json.put("move", move);
+		json.put("sessionKey", sessionKey);
+		json.put("userId", userId);
+		
+		Player player = GameCoreManager.getInstance().getGame(sessionKey).getPlayerById(userId);
+		
+		sendGCM(player.getGcmToken(), json.toJSONString());
+	}
+	
 	public void sendGCM(String gcmToken, String data) {
 		StackTraceElement[] stackTrace = new Throwable().getStackTrace();
 		

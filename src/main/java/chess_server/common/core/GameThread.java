@@ -108,8 +108,10 @@ public class GameThread implements Runnable {
 	private void setTurnData() {
 		boolean checkFlag = chessBoard.isCheck(currentPlayer.getColor().toUpperCase().charAt(0));
 //		boolean checkFlag = chessBoard.isCheck();
-//		boolean checkMateFlag = chessBoard.isCheckmate(currentPlayer.getColor().toUpperCase().charAt(0));
-		boolean checkMateFlag = chessBoard.isCheckmate();
+		boolean checkMateFlag = chessBoard.isCheckmate(currentPlayer.getColor().toUpperCase().charAt(0));
+//		boolean checkMateFlag = chessBoard.isCheckmate();
+		boolean staleMateFlag = chessBoard.isStalemate(currentPlayer.getColor().toUpperCase().charAt(0));
+		boolean drawFlag = chessBoard.isDraw();
 		
 		turnData.clear();
 		
@@ -121,7 +123,17 @@ public class GameThread implements Runnable {
 			move.put("destTile", currentPlayer.getRecentMoveDestnation());
 			move.put("targetPiece", currentPlayer.getRecentMoveTarget());
 			turnData.put("move", move);
-			sender.winnerNotice(getSessionKey(), currentPlayer.getGcmToken(), "CHECKMATE");
+			sender.winnerNotice(getSessionKey(), currentPlayer.getId(), "CHECKMATE");
+		}
+		else if (staleMateFlag) {
+			turnData.put("type", "CHECKMATE");
+			JSONObject move = new JSONObject();
+			move.put("srcPiece", currentPlayer.getRecentMoveObject());
+			move.put("destTile", currentPlayer.getRecentMoveDestnation());
+			move.put("targetPiece", currentPlayer.getRecentMoveTarget());
+			turnData.put("move", move);
+//			sender.winnerNotice(getSessionKey(), currentPlayer.getGcmToken(), "CHECKMATE");
+			sender.stalemateNotice(getSessionKey(), currentPlayer.getId());
 		}
 		else {
 			turnData.put("type", "YOUR_TURN");
