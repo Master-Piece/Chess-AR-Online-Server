@@ -1,9 +1,11 @@
 package chess_server.common.core;
 
 import org.json.simple.JSONArray;
+import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 
 public class Algorithm {
+	Logger log = Logger.getLogger(this.getClass());
 	class Piece{
 		char unit;
 		String name;
@@ -311,7 +313,7 @@ public class Algorithm {
 		Piece unit = getPiece(tile);
 		char color = player.getColor().charAt(0);
 		color = Character.toUpperCase(color);
-		
+		System.out.println("color = " + color + " tile = " + tile);
 		if(unit != null && color == unit.color){
 			//이동가능한 타일들 모아서 보내줌
 			JSONArray moves = getMovable(tile, 1);	
@@ -336,6 +338,24 @@ public class Algorithm {
 		JSONObject move = new JSONObject(), rookMove = new JSONObject();
 		String castling = "NONE";
 		String castlingTile = null, castlingUnit = null;
+		
+		log.debug("move called");
+		log.debug("move information\n srctile = " + srcTile + "\ndesttile = " + destTile +"\n");
+		
+		JSONArray moves = getMovable(srcTile, 1);
+		boolean flag = false;
+		//moves 안에 destTile 없으면 fail message 전송하고 리턴
+		String [] recipients = new String [moves.size()];
+		for (int i = 0; i < moves.size(); i++) {
+		    if(moves.get(i).equals(destTile)) flag = true;
+		}
+		if(!flag){
+			message.put("type", "MOVE_FAILED");
+			message.put("state", "NONE");
+			log.debug("unvalid move");
+			return message;
+		}
+		    
 		char color = player.getColor().charAt(0);
 		color = Character.toUpperCase(color);
 		int src_position[] = getPosition(srcTile); 
@@ -347,8 +367,9 @@ public class Algorithm {
 		board[src_position[0]][src_position[1]] = null;
 		board[dest_position[0]][dest_position[1]] = src_unit;
 		src_unit.isFirstMove = false;
-			
+		
 		if(src_unit.unit == 'P'){
+			log.debug("pawn moving");
 			if(Math.abs(src_position[0] - dest_position[0]) == 2){
 				int nx = dest_position[0], ny = dest_position[1]+1;
 				if(isInRange(nx,ny) && board[nx][ny] != null && board[nx][ny].unit == 'P' && board[nx][ny].color != src_unit.color){
@@ -368,7 +389,9 @@ public class Algorithm {
 			}
 		}
 		else if(src_unit.unit == 'K'){
+			log.debug("King moving");
 			if(Math.abs(src_position[1] - dest_position[1]) == 2){
+				log.debug("CASTLING");
 				castling = "CASTLING";
 			}
 			if(dest_position[1] == 2){
@@ -407,12 +430,14 @@ public class Algorithm {
 		message.put("state", castling);
 		move.put("srcPiece",src_unit.name);
 		move.put("destTile",destTile);
-		move.put("targetPiece", dest_unit.name);
+		if(dest_unit == null) move.put("targetPiece", "");
+		else move.put("targetPiece", dest_unit.name);
 		message.put("move",move);
 		
 		rookMove.put("srcPiece", castlingUnit);
 		rookMove.put("destTile", castlingTile);
 		message.put("rookMove", rookMove);
+		log.debug("move finished");
 		return message;
 	}	
 	
@@ -435,7 +460,12 @@ public class Algorithm {
 				}
 			}	
 		}
-		if(moves.size() == 0) return true;
+		else return false;
+		if(moves.size() == 0){
+			log.debug("is checkmate");
+			return true;
+		}
+		
 		return false;
 	}
 	
@@ -445,7 +475,7 @@ public class Algorithm {
 	}
 	
 	public boolean isCheck(char color){
-		System.out.println("ischeck called\n");
+		//System.out.println("ischeck called\n");
 		int check[][] = {
 				{0, 0, 0, 0, 0, 0, 0, 0},
 				{0, 0, 0, 0, 0, 0, 0, 0},
@@ -480,7 +510,10 @@ public class Algorithm {
 				}
 			}
 		}
-		if(check[kingX][kingY] == 1) return true;
+		if(check[kingX][kingY] == 1){
+			log.debug("is check");
+			return true;
+		}
 		return false;
 	}
 
@@ -495,6 +528,7 @@ public class Algorithm {
 				}
 			}
 		}
+		log.debug("is stalemate");
 		return true;
 	}
 	
