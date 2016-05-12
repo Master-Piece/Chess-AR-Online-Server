@@ -226,7 +226,7 @@ public class GameThread implements Runnable {
 		json.put("userId", player.getId());
 		JSONObject move = (JSONObject) json.get("move");
 		info("move: " + move.toJSONString());
-		currentPlayer.setRecentMove((String) move.get("srcPiece"), (String) move.get("destTile"));
+		currentPlayer.setRecentMove((String) move.get("srcPiece"), (String) move.get("destTile"), (String) move.get("targetPiece"));
 		
 		synchronized(thread) {
 			moveFlag = false;
