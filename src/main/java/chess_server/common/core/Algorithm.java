@@ -47,6 +47,7 @@ public class Algorithm {
 	}
 	
 	private Piece getPiece(int x, int y){
+		if(!isInRange(x,y)) log.debug("unvalid tile requested");
 		return board[x][y];
 	}
 	
@@ -57,6 +58,7 @@ public class Algorithm {
 	
 	private int[] getPosition(String tile){
 		int x[] = {tile.charAt(1) - '1' , tile.charAt(0) - 'A'};
+		if(!isInRange(x[0],x[1])) log.debug("unvalid tile requested");
 		return x;
 	}
 	
@@ -276,6 +278,7 @@ public class Algorithm {
 		return !result;
 	}	
 	
+	
 	private JSONArray getMovable(String tile, int flag){
 		//tile의 이동 가능 경로 리턴, flag는 이동했을시 check인지 아닌지 확인 여부 
 		JSONArray moves = new JSONArray();
@@ -317,17 +320,20 @@ public class Algorithm {
 		if(unit != null && color == unit.color){
 			//이동가능한 타일들 모아서 보내줌
 			JSONArray moves = getMovable(tile, 1);	
-			message.put("type", "SELECT_SUCCESS");
-			message.put("piece",  unit.name);
-			message.put("tiles", moves);
-			message.put("error", "");
+			if(moves.size() != 0){					
+				message.put("type", "SELECT_SUCCESS");
+				message.put("piece",  unit.name);
+				message.put("tiles", moves);
+				message.put("error", "");
+				return message;
+			}
 		}
-		else{
-			message.put("type", "SELECT_FAILED");
-			message.put("piece",  "");
-			message.put("tiles", "");
-			message.put("error", "");
-		}
+		
+		message.put("type", "SELECT_FAILED");
+		message.put("piece",  "");
+		message.put("tiles", "");
+		message.put("error", "");
+		
 						
 		return message;
 	}
@@ -364,8 +370,7 @@ public class Algorithm {
 			return message;
 		}
 		    
-			
-		
+
 		board[src_position[0]][src_position[1]] = null;
 		board[dest_position[0]][dest_position[1]] = src_unit;
 		src_unit.isFirstMove = false;
