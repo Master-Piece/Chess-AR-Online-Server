@@ -342,27 +342,29 @@ public class Algorithm {
 		log.debug("move called");
 		log.debug("move information\n srctile = " + srcTile + "\ndesttile = " + destTile +"\n");
 		
-		JSONArray moves = getMovable(srcTile, 1);
-		boolean flag = false;
-		//moves 안에 destTile 없으면 fail message 전송하고 리턴
-		String [] recipients = new String [moves.size()];
-		for (int i = 0; i < moves.size(); i++) {
-		    if(moves.get(i).equals(destTile)) flag = true;
-		}
-		if(!flag){
-			message.put("type", "MOVE_FAILED");
-			message.put("state", "NONE");
-			log.debug("unvalid move");
-			return message;
-		}
-		    
 		char color = player.getColor().charAt(0);
 		color = Character.toUpperCase(color);
 		int src_position[] = getPosition(srcTile); 
 		Piece src_unit = getPiece(srcTile);
 		
 		int dest_position[] = getPosition(destTile);
-		Piece dest_unit = getPiece(destTile);	
+		Piece dest_unit = getPiece(destTile);
+		
+		
+		JSONArray moves = getMovable(srcTile, 1);
+		boolean flag = false;
+		//moves 안에 destTile 없으면 fail message 전송하고 리턴
+		for (int i = 0; i < moves.size(); i++) {
+		    if(moves.get(i).equals(destTile)) flag = true;
+		}
+		if(src_unit == null || color != src_unit.color || !flag){
+			message.put("type", "MOVE_FAILED");
+			message.put("state", "NONE");
+			log.debug("unvalid move");
+			return message;
+		}
+		    
+			
 		
 		board[src_position[0]][src_position[1]] = null;
 		board[dest_position[0]][dest_position[1]] = src_unit;
@@ -452,7 +454,7 @@ public class Algorithm {
 		if(isCheck(color)){
 			for(i=0;i<8;i++){
 				for(j=0;j<8;j++){
-					if(board[i][j].unit == 'K'){
+					if(board[i][j] != null && board[i][j].unit == 'K'){
 						if(board[i][j].color == color){
 							moves = getKingMove(i,j, 0);
 						}
