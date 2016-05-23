@@ -224,6 +224,11 @@ public class GameThread implements Runnable {
 		JSONObject json = chessBoard.move(player, srcTile, destTile);
 		json.put("sessionKey", getSessionKey());
 		json.put("userId", player.getId());
+		
+		if (((String)json.get("type")).equals("MOVE_FAILED")) { // if MOVE_FAILED, don't change state.
+			return json.toJSONString();
+		}
+		
 		JSONObject move = (JSONObject) json.get("move");
 		info("move: " + move.toJSONString());
 		currentPlayer.setRecentMove((String) move.get("srcPiece"), (String) move.get("destTile"), (String) move.get("targetPiece"));
@@ -283,5 +288,9 @@ public class GameThread implements Runnable {
 		synchronized(thread) {
 			thread.notify();
 		}
+	}
+	
+	public boolean isMyTurn(String userId) {
+		return currentPlayer.getId().equals(userId);
 	}
 } 
