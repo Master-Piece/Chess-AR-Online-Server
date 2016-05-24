@@ -16,12 +16,12 @@ public class ChessTimer implements Runnable {
 	public void run() {
 		try {
 			while ((System.currentTimeMillis() - startTime) < waitTime) {
-				Thread.sleep(1);
+				Thread.sleep(500);
 			}
 			chessThread.interrupt();
 			log.debug("Timer out");
 		} catch (InterruptedException e) {
-			log.debug("Timer Failed");
+			log.info(String.format("[%d] Timer End", chessThread.getId()));
 		}
 	}
 	
@@ -52,5 +52,9 @@ public class ChessTimer implements Runnable {
 	
 	public long getTimerId() {
 		return thread.getId();
+	}
+	
+	public void endCount() {
+		thread.interrupted();
 	}
 }

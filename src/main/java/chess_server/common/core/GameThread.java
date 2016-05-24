@@ -260,6 +260,7 @@ public class GameThread implements Runnable {
 		//return chessBoard.surrender(player).toJSONString();
 		JSONObject json = new JSONObject();
 		json.put("type", "SURRENDER_ACCEPT");
+		cTimer.endCount();
 		return json.toJSONString();
 	}
 	
