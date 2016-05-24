@@ -26,6 +26,7 @@ public class GameThread implements Runnable {
 	
 	private Algorithm chessBoard;
 	private JSONObject turnData;
+	private JSONObject lastMoveData;
 	private Turn turn;
 	private boolean gameFlag = true; // 게임 종료 또는 항복시 false
 	private boolean moveFlag = true; // move시 false
@@ -144,6 +145,8 @@ public class GameThread implements Runnable {
 			info("move in setTurnData: " + move.toJSONString());
 			turnData.put("move", move);
 			turnData.put("check", checkFlag);
+			turnData.put("state", lastMoveData.get("state"));
+			turnData.put("rookMove", lastMoveData.get("rookMove"));
 		}
 	}
 
@@ -222,6 +225,7 @@ public class GameThread implements Runnable {
 	 * */
 	public String userMoveTile(Player player, String srcTile, String destTile) {
 		JSONObject json = chessBoard.move(player, srcTile, destTile);
+		lastMoveData = chessBoard.move(player, srcTile, destTile);
 		json.put("sessionKey", getSessionKey());
 		json.put("userId", player.getId());
 		
