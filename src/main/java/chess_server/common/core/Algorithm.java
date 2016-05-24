@@ -400,29 +400,30 @@ public class Algorithm {
 			if(Math.abs(src_position[1] - dest_position[1]) == 2){
 				log.debug("CASTLING");
 				castling = "CASTLING";
-			}
-			if(dest_position[1] == 2){
-				if(src_unit.color == 'W'){
-					//WR1 -> 3
-					castlingUnit = "WR1";
-					castlingTile = "C1";
+			
+				if(dest_position[1] == 2){
+					if(src_unit.color == 'W'){
+						//WR1 -> 3
+						castlingUnit = "WR1";
+						castlingTile = "D1";
+					}
+					else{
+						//BR2 -> 3
+						castlingUnit = "BR2";
+						castlingTile = "D8";
+					}
 				}
-				else{
-					//BR2 -> 3
-					castlingUnit = "BR2";
-					castlingTile = "C8";
-				}
-			}
-			else if(dest_position[1] == 6){
-				if(src_unit.color == 'W'){
-					//WR2 -> 5
-					castlingUnit = "WR2";
-					castlingTile = "F1";
-				}
-				else{
-					//BR1 -> 5
-					castlingUnit = "BR1";
-					castlingTile = "F8";
+				else if(dest_position[1] == 6){
+					if(src_unit.color == 'W'){
+						//WR2 -> 5
+						castlingUnit = "WR2";
+						castlingTile = "F1";
+					}
+					else{
+						//BR1 -> 5
+						castlingUnit = "BR1";
+						castlingTile = "F8";
+					}
 				}
 			}
 		}	
