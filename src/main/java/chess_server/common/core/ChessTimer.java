@@ -55,6 +55,6 @@ public class ChessTimer implements Runnable {
 	}
 	
 	public void endCount() {
-		thread.interrupted();
+		thread.interrupt();
 	}
 }
