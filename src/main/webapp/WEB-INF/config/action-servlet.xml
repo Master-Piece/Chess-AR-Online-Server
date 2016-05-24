@@ -21,6 +21,10 @@
             <mvc:mapping path="/**"/>
             <bean id="loggerInterceptor" class="chess_server.common.logger.LoggerInterceptor"></bean>
         </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/game/**"/>
+            <bean id="sessionCheckInterceptor" class="chess_server.common.core.SessionCheckInterceptor"></bean>
+        </mvc:interceptor>
     </mvc:interceptors>
      
     <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
