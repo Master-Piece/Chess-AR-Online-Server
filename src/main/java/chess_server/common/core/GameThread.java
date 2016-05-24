@@ -225,7 +225,7 @@ public class GameThread implements Runnable {
 	 * */
 	public String userMoveTile(Player player, String srcTile, String destTile) {
 		JSONObject json = chessBoard.move(player, srcTile, destTile);
-		lastMoveData = chessBoard.move(player, srcTile, destTile);
+		lastMoveData = (JSONObject) json.clone();
 		json.put("sessionKey", getSessionKey());
 		json.put("userId", player.getId());
 		
