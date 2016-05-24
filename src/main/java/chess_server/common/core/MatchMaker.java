@@ -63,6 +63,9 @@ public class MatchMaker implements Runnable {
 	}
 	
 	public boolean enqueue(Player player) {
+		if (isInQueue(player)) {
+			return false;
+		}
 		log.debug(String.format("User enqueued : %s(%s)", player.getNickName(), player.getId()));
 		accumulateUsers++;
 		return queue.add(player);
@@ -115,5 +118,14 @@ public class MatchMaker implements Runnable {
 	
 	public boolean isMMRunning() {
 		return isRunning;
+	}
+	
+	private boolean isInQueue(Player player) {
+		for (Player enqueuedPlayer : queue) {
+			if (enqueuedPlayer.getGcmToken().equals(player.getGcmToken())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
