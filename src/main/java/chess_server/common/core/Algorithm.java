@@ -319,7 +319,7 @@ public class Algorithm {
 		System.out.println("color = " + color + " tile = " + tile);
 		if(unit != null && color == unit.color){
 			//이동가능한 타일들 모아서 보내줌
-			JSONArray moves = getMovable(tile, 1);	
+			JSONArray moves = getMovable(tile, 1);
 			if(moves.size() != 0){					
 				message.put("type", "SELECT_SUCCESS");
 				message.put("piece",  unit.name);
@@ -469,7 +469,7 @@ public class Algorithm {
 			}	
 		}
 		else return false;
-		if(moves.size() == 0){
+		if(moves  == null){
 			log.debug("is checkmate");
 			return true;
 		}
@@ -532,7 +532,7 @@ public class Algorithm {
 			for(j=0;j<8;j++){
 				if(board[i][j] != null &&  board[i][j].color == color){
 					moves = getMovable(getTile(i,j),1);
-					if(moves.size() != 0) return false;
+					if(moves != null) return false;
 				}
 			}
 		}
