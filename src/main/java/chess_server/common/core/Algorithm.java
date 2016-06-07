@@ -406,11 +406,15 @@ public class Algorithm {
 						//WR1 -> 3
 						castlingUnit = "WR1";
 						castlingTile = "D1";
+						board[0][3] = getPiece("A1");
+						board[0][0] = null;
 					}
 					else{
 						//BR2 -> 3
 						castlingUnit = "BR2";
 						castlingTile = "D8";
+						board[7][3] = getPiece("H1");
+						board[0][0] = null;
 					}
 				}
 				else if(dest_position[1] == 6){
@@ -418,11 +422,15 @@ public class Algorithm {
 						//WR2 -> 5
 						castlingUnit = "WR2";
 						castlingTile = "F1";
+						board[0][5] = getPiece("A8");
+						board[0][7] = null;
 					}
 					else{
 						//BR1 -> 5
 						castlingUnit = "BR1";
 						castlingTile = "F8";
+						board[7][5] = getPiece("H8");
+						board[7][7] = null;
 					}
 				}
 			}
