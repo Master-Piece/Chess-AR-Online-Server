@@ -1,3 +1,5 @@
+<!-- 갑자기 깃헙에서 심각한 Security Issue 있다고 메일 겁나 날라와서 일단 전체 주석 처리함[2018/10/18] -->
+<!-- 
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -360,3 +362,4 @@
         </plugins>
     </build>
 </project>
+-->
